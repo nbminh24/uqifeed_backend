@@ -1,7 +1,6 @@
 import os
 import json
-from database import get_db  # Import hàm kết nối database
-
+from src.services.database import get_db
 async def ensure_ingredient_exists(db, ingredient_name, nutrition_info):
     """Đảm bảo rằng nguyên liệu tồn tại trong bảng ingredients và cập nhật nếu cần"""
     ingredient = await db.fetchrow("SELECT id FROM ingredients WHERE name = $1", ingredient_name)
