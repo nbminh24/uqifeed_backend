@@ -1,9 +1,12 @@
 import os
-import json  # Import json để xử lý dữ liệu JSON
-import re  # Import regex để lọc JSON hợp lệ
-from PIL import Image  # Import lớp Image từ thư viện Pillow
+import json
+import re
+from PIL import Image
 from dotenv import load_dotenv
 import google.generativeai as genai
+import requests
+from io import BytesIO
+from flask import Flask, request, jsonify  # Thêm Flask để tạo endpoint
 
 # Load API Key từ file .env
 load_dotenv()
@@ -13,16 +16,24 @@ API_KEY = os.getenv("GENAI_API_KEY")
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 
-def process_image(image_path):
-    """Nhận diện món ăn từ ảnh và trích xuất thông tin dinh dưỡng"""
+def process_image(image_source):
+    """Nhận diện món ăn từ ảnh (file hoặc URL) và trích xuất thông tin dinh dưỡng"""
     try:
-        image = Image.open(image_path)
+        # Kiểm tra nếu image_source là URL
+        if image_source.startswith("http://") or image_source.startswith("https://"):
+            response = requests.get(image_source)
+            response.raise_for_status()  # Kiểm tra lỗi HTTP
+            image = Image.open(BytesIO(response.content))
+        else:
+            # Nếu không phải URL, xử lý như file cục bộ
+            image = Image.open(image_source)
 
         # Prompt yêu cầu trả về dữ liệu có cấu trúc rõ ràng
         prompt = """
         Hãy phân tích món ăn trong ảnh và trả về thông tin dưới định dạng JSON:
         {
             "description": "Mô tả ngắn gọn về món ăn",
+            "serves": "Ước lượng số khẩu phần ăn",
             "ingredients": [
                 {
                     "name": "Tên nguyên liệu",
@@ -43,9 +54,6 @@ def process_image(image_path):
         response = model.generate_content([prompt, image], stream=False)
 
         # Kiểm tra kiểu dữ liệu phản hồi
-        print("Type of response:", type(response))
-        
-        # Kiểm tra phản hồi từ Gemini API
         if not response or not response.text:
             return {"status": "error", "message": "Không có phản hồi từ mô hình."}
 
@@ -70,6 +78,7 @@ def process_image(image_path):
 
         # 🛑 Trích xuất thông tin
         description = parsed_result.get("description", "")
+        serves = parsed_result.get("serves", 1)  # Mặc định là 1 nếu không có
         ingredients = parsed_result.get("ingredients", [])
 
         # 🛑 Chuẩn hóa thông tin nguyên liệu
@@ -86,14 +95,26 @@ def process_image(image_path):
         return {
             "status": "success",
             "description": description,
+            "serves": serves,
             "ingredients": processed_ingredients
         }
     
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# ===== TEST FUNCTION =====
-if __name__ == "__main__":
-    test_image_path = "C:/Users/USER/Downloads/test.jpg"
-    result = process_image(test_image_path)
-    print(result)
+# Flask app để test trên Postman
+app = Flask(__name__)
+
+@app.route('/process-image', methods=['POST'])
+def process_image_endpoint():
+    data = request.json
+    image_source = data.get('image_source')  # Lấy link ảnh hoặc đường dẫn file cục bộ từ request
+    if not image_source:
+        return jsonify({"status": "error", "message": "Thiếu link ảnh hoặc đường dẫn file cục bộ."}), 400
+
+    # Gọi hàm process_image để xử lý ảnh
+    result = process_image(image_source)
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(debug=True)
