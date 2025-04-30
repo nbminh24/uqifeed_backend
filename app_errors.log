@@ -1,0 +1,1140 @@
+2025-04-24 17:46:58,456 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-24 17:46:58,457 - uqifeed - INFO - Creating database indexes...
+2025-04-24 17:47:02,482 - uqifeed - ERROR - Error creating database indexes: Index option direction in command createIndexes either does not exist or is disallowed in this Atlas tier, full error: {'ok': 0, 'errmsg': 'Index option direction in command createIndexes either does not exist or is disallowed in this Atlas tier', 'code': 8000, 'codeName': 'AtlasError'}
+2025-04-24 17:47:02,483 - uqifeed - CRITICAL - Failed to connect to MongoDB: Index option direction in command createIndexes either does not exist or is disallowed in this Atlas tier, full error: {'ok': 0, 'errmsg': 'Index option direction in command createIndexes either does not exist or is disallowed in this Atlas tier', 'code': 8000, 'codeName': 'AtlasError'}
+2025-04-24 17:48:47,829 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-24 17:48:47,830 - uqifeed - INFO - Creating database indexes...
+2025-04-24 17:48:49,486 - uqifeed - INFO - Database indexes created successfully
+2025-04-24 17:49:49,187 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-24 17:49:49,188 - uqifeed - INFO - Creating database indexes...
+2025-04-24 17:49:53,145 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:15:54,280 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:15:54,349 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:15:55,561 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:17:42,601 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:17:42,602 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:17:43,811 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:21:45,592 - uqifeed - CRITICAL - Unhandled Exception: type object 'datetime.timedelta' has no attribute 'utcnow' (Error ID: 1745558505)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\user_router.py", line 104, in create_profile
+    "updated_at": timedelta.utcnow()
+                  ^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.timedelta' has no attribute 'utcnow'
+2025-04-25 12:23:09,009 - uqifeed - CRITICAL - Unhandled Exception: type object 'datetime.timedelta' has no attribute 'utcnow' (Error ID: 1745558589)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\user_router.py", line 104, in create_profile
+    "updated_at": timedelta.utcnow()
+                  ^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.timedelta' has no attribute 'utcnow'
+2025-04-25 12:25:16,218 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:25:16,219 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:25:17,465 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:25:30,160 - uqifeed - CRITICAL - Unhandled Exception: type object 'datetime.timedelta' has no attribute 'utcnow' (Error ID: 1745558730)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\user_router.py", line 104, in create_profile
+    "updated_at": datetime.utcnow()
+                  ^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.timedelta' has no attribute 'utcnow'
+2025-04-25 12:25:38,709 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:25:38,710 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:25:40,059 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:26:28,228 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:26:28,229 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:26:29,424 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:26:37,371 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:26:37,372 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:26:39,218 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:58:50,279 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:58:50,280 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:58:51,938 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 12:59:03,131 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 12:59:03,132 - uqifeed - INFO - Creating database indexes...
+2025-04-25 12:59:04,306 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:07:52,509 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:07:52,510 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:07:55,428 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:08:23,420 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:08:23,421 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:08:24,728 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:09:06,770 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:09:06,771 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:09:08,151 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:15:54,467 - uqifeed - CRITICAL - Unhandled Exception: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'> (Error ID: 1745561754)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\calorie_router.py", line 168, in get_daily_report
+    report = await update_daily_report(current_user["id"], report_date)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\services\database.py", line 208, in update_daily_report
+    report = await daily_reports_collection.find_one({
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\collection.py", line 1508, in find_one
+    for result in cursor.limit(-1):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1262, in next
+    if len(self.__data) or self._refresh():
+                           ^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1179, in _refresh
+    self.__send_message(q)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1060, in __send_message
+    response = client._run_operation(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1388, in _run_operation
+    return self._retryable_read(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1535, in _retryable_read
+    return func(session, server, conn, read_pref)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1384, in _cmd
+    return server.run_operation(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\helpers.py", line 315, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\server.py", line 139, in run_operation
+    message = operation.get_message(read_preference, conn, use_cmd)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 429, in get_message
+    request_id, msg, size, _ = _op_msg(
+                               ^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 765, in _op_msg
+    return _op_msg_uncompressed(flags, command, identifier, docs, opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bson.errors.InvalidDocument: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'>
+2025-04-25 13:16:05,704 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:16:05,705 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:16:07,413 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:16:13,855 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:16:13,855 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:16:15,199 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:16:19,201 - uqifeed - CRITICAL - Unhandled Exception: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'> (Error ID: 1745561779)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\calorie_router.py", line 168, in get_daily_report
+    report = await update_daily_report(current_user["id"], report_date)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\services\database.py", line 208, in update_daily_report
+    report = await daily_reports_collection.find_one({
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\collection.py", line 1508, in find_one
+    for result in cursor.limit(-1):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1262, in next
+    if len(self.__data) or self._refresh():
+                           ^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1179, in _refresh
+    self.__send_message(q)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1060, in __send_message
+    response = client._run_operation(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1388, in _run_operation
+    return self._retryable_read(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1535, in _retryable_read
+    return func(session, server, conn, read_pref)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1384, in _cmd
+    return server.run_operation(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\helpers.py", line 315, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\server.py", line 139, in run_operation
+    message = operation.get_message(read_preference, conn, use_cmd)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 429, in get_message
+    request_id, msg, size, _ = _op_msg(
+                               ^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 765, in _op_msg
+    return _op_msg_uncompressed(flags, command, identifier, docs, opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bson.errors.InvalidDocument: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'>
+2025-04-25 13:16:20,612 - uqifeed - CRITICAL - Unhandled Exception: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'> (Error ID: 1745561780)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\calorie_router.py", line 168, in get_daily_report
+    report = await update_daily_report(current_user["id"], report_date)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\services\database.py", line 208, in update_daily_report
+    report = await daily_reports_collection.find_one({
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\collection.py", line 1508, in find_one
+    for result in cursor.limit(-1):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1262, in next
+    if len(self.__data) or self._refresh():
+                           ^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1179, in _refresh
+    self.__send_message(q)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1060, in __send_message
+    response = client._run_operation(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1388, in _run_operation
+    return self._retryable_read(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1535, in _retryable_read
+    return func(session, server, conn, read_pref)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1384, in _cmd
+    return server.run_operation(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\helpers.py", line 315, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\server.py", line 139, in run_operation
+    message = operation.get_message(read_preference, conn, use_cmd)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 429, in get_message
+    request_id, msg, size, _ = _op_msg(
+                               ^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 765, in _op_msg
+    return _op_msg_uncompressed(flags, command, identifier, docs, opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bson.errors.InvalidDocument: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'>
+2025-04-25 13:17:53,304 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:17:53,306 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:17:54,667 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:18:02,648 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:18:02,649 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:18:03,976 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:18:07,250 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:18:07,251 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:18:08,706 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:18:13,973 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:18:13,973 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:18:15,140 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:19:26,403 - uqifeed - CRITICAL - Unhandled Exception: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'> (Error ID: 1745561966)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 241, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 167, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\routes\calorie_router.py", line 168, in get_daily_report
+    report = await update_daily_report(current_user["id"], report_date)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\services\database.py", line 208, in update_daily_report
+    report_date_str = report_date.isoformat()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\collection.py", line 1508, in find_one
+    for result in cursor.limit(-1):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1262, in next
+    if len(self.__data) or self._refresh():
+                           ^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1179, in _refresh
+    self.__send_message(q)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\cursor.py", line 1060, in __send_message
+    response = client._run_operation(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1388, in _run_operation
+    return self._retryable_read(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\_csot.py", line 108, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1535, in _retryable_read
+    return func(session, server, conn, read_pref)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\mongo_client.py", line 1384, in _cmd
+    return server.run_operation(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\helpers.py", line 315, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\server.py", line 139, in run_operation
+    message = operation.get_message(read_preference, conn, use_cmd)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 429, in get_message
+    request_id, msg, size, _ = _op_msg(
+                               ^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\pymongo\message.py", line 765, in _op_msg
+    return _op_msg_uncompressed(flags, command, identifier, docs, opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bson.errors.InvalidDocument: cannot encode object: datetime.date(2025, 4, 25), of type: <class 'datetime.date'>
+2025-04-25 13:19:35,633 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:19:35,634 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:19:36,897 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:21:08,574 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:21:08,575 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:21:09,725 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:29:37,747 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:29:37,747 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:29:39,062 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:30:33,894 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:30:33,896 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:30:35,291 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:31:09,210 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:31:09,211 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:31:10,224 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:34:37,390 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:34:37,395 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:34:38,864 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:40:35,235 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:40:35,236 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:40:36,598 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:41:02,863 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:41:02,864 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:41:04,131 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:41:10,340 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:41:10,341 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:41:11,492 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:42:04,726 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:42:04,728 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:42:06,108 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:43:23,200 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:43:23,201 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:43:24,378 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:45:58,894 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:45:58,895 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:46:00,215 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:46:06,806 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:46:06,806 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:46:08,237 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:46:11,088 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:46:11,089 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:46:12,487 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:46:20,704 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:46:20,705 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:46:22,150 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:47:20,025 - uqifeed - CRITICAL - Unhandled Exception: 5 validation errors for NutritionReviewResponse
+response -> protein_comment
+  field required (type=value_error.missing)
+response -> fat_comment
+  field required (type=value_error.missing)
+response -> carb_comment
+  field required (type=value_error.missing)
+response -> fiber_comment
+  field required (type=value_error.missing)
+response -> calories_comment
+  field required (type=value_error.missing) (Error ID: 1745563640)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 259, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 145, in serialize_response
+    raise ValidationError(errors, field.type_)
+pydantic.error_wrappers.ValidationError: 5 validation errors for NutritionReviewResponse
+response -> protein_comment
+  field required (type=value_error.missing)
+response -> fat_comment
+  field required (type=value_error.missing)
+response -> carb_comment
+  field required (type=value_error.missing)
+response -> fiber_comment
+  field required (type=value_error.missing)
+response -> calories_comment
+  field required (type=value_error.missing)
+2025-04-25 13:47:41,555 - uqifeed - CRITICAL - Unhandled Exception: 5 validation errors for NutritionReviewResponse
+response -> protein_comment
+  field required (type=value_error.missing)
+response -> fat_comment
+  field required (type=value_error.missing)
+response -> carb_comment
+  field required (type=value_error.missing)
+response -> fiber_comment
+  field required (type=value_error.missing)
+response -> calories_comment
+  field required (type=value_error.missing) (Error ID: 1745563661)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 259, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 145, in serialize_response
+    raise ValidationError(errors, field.type_)
+pydantic.error_wrappers.ValidationError: 5 validation errors for NutritionReviewResponse
+response -> protein_comment
+  field required (type=value_error.missing)
+response -> fat_comment
+  field required (type=value_error.missing)
+response -> carb_comment
+  field required (type=value_error.missing)
+response -> fiber_comment
+  field required (type=value_error.missing)
+response -> calories_comment
+  field required (type=value_error.missing)
+2025-04-25 13:48:09,243 - uqifeed - CRITICAL - Unhandled Exception: 5 validation errors for NutritionReviewResponse
+response -> protein_comment
+  field required (type=value_error.missing)
+response -> fat_comment
+  field required (type=value_error.missing)
+response -> carb_comment
+  field required (type=value_error.missing)
+response -> fiber_comment
+  field required (type=value_error.missing)
+response -> calories_comment
+  field required (type=value_error.missing) (Error ID: 1745563689)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 259, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 145, in serialize_response
+    raise ValidationError(errors, field.type_)
+pydantic.error_wrappers.ValidationError: 5 validation errors for NutritionReviewResponse
+response -> protein_comment
+  field required (type=value_error.missing)
+response -> fat_comment
+  field required (type=value_error.missing)
+response -> carb_comment
+  field required (type=value_error.missing)
+response -> fiber_comment
+  field required (type=value_error.missing)
+response -> calories_comment
+  field required (type=value_error.missing)
+2025-04-25 13:48:24,860 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:48:24,861 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:48:26,211 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:50:36,710 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:50:36,711 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:50:38,127 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:50:58,534 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:50:58,535 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:50:59,847 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:51:05,817 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:51:05,818 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:51:07,320 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:51:12,419 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:51:12,421 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:51:13,609 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:51:28,499 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:51:28,499 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:51:29,975 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:53:11,405 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:53:11,405 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:53:12,451 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:53:25,098 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:53:25,098 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:53:26,252 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:55:59,144 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:55:59,144 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:56:00,270 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:56:10,283 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:56:10,285 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:56:11,591 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:56:19,379 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:56:19,380 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:56:20,785 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:56:29,104 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:56:29,105 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:56:30,430 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:56:42,502 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:56:42,503 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:56:43,650 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:58:06,117 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:58:06,118 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:58:07,194 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:58:12,127 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:58:12,127 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:58:13,495 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:58:25,529 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:58:25,529 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:58:26,689 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:58:53,975 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 13:58:53,975 - uqifeed - INFO - Creating database indexes...
+2025-04-25 13:58:55,391 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 13:59:14,582 - uqifeed - CRITICAL - Unhandled Exception: 3 validation errors for AdviseResponse
+response -> advice_type
+  field required (type=value_error.missing)
+response -> summary
+  field required (type=value_error.missing)
+response -> advice_text
+  field required (type=value_error.missing) (Error ID: 1745564354)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 259, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 145, in serialize_response
+    raise ValidationError(errors, field.type_)
+pydantic.error_wrappers.ValidationError: 3 validation errors for AdviseResponse
+response -> advice_type
+  field required (type=value_error.missing)
+response -> summary
+  field required (type=value_error.missing)
+response -> advice_text
+  field required (type=value_error.missing)
+2025-04-25 14:01:00,289 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:01:00,290 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:01:01,383 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:01:08,487 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:01:08,487 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:01:09,711 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:01:19,430 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:01:19,431 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:01:20,718 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:02:49,653 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:02:49,656 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:02:51,014 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:03:13,145 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:03:13,147 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:03:14,609 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:03:27,051 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:03:27,051 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:03:28,487 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:03:55,052 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:03:55,054 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:03:56,538 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:06:01,200 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:06:01,201 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:06:02,665 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:06:08,709 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:06:08,710 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:06:10,087 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:06:19,911 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:06:19,912 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:06:20,999 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:06:40,018 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:06:40,018 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:06:41,311 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:08:15,457 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:08:15,458 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:08:16,997 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:08:29,422 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:08:29,424 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:08:30,889 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:11:02,584 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:11:02,585 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:11:03,742 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:11:10,852 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:11:10,853 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:11:11,377 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:11:11,378 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:11:12,280 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:11:12,624 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:11:23,768 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:11:23,769 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:11:25,209 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:11:41,204 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:11:41,204 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:11:42,522 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:11:44,599 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:11:44,600 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:11:45,743 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:12:23,060 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:12:23,060 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:12:24,278 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:13:15,851 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:13:15,851 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:13:17,148 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:13:30,884 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:13:30,885 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:13:32,315 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:15:27,211 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:15:27,211 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:15:28,239 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:16:12,762 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:16:12,762 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:16:14,068 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:16:23,465 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:16:23,465 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:16:24,915 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:13,998 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:13,999 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:14,102 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:14,103 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:14,414 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:14,415 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:14,508 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:14,510 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:14,750 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:14,751 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:14,840 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:14,843 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:15,138 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:15,139 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:15,221 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:21:15,222 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:21:15,537 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:15,920 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:16,106 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:16,256 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:16,385 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:16,645 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:21:16,698 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:23:42,228 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:23:42,228 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:23:43,638 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:24:25,754 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:24:25,755 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:24:27,079 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:05,931 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:05,931 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:07,099 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:15,451 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:15,452 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:16,262 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:16,267 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:16,720 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:16,923 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:16,924 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:17,097 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:17,100 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:17,887 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:17,962 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:17,963 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:18,006 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:26:18,007 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:26:18,467 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:18,563 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:19,197 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:26:19,308 - uqifeed - INFO - Database indexes created successfully
+2025-04-25 14:38:06,432 - uqifeed - CRITICAL - Unhandled Exception: 3 validation errors for AdviseResponse
+response -> advice_type
+  field required (type=value_error.missing)
+response -> summary
+  field required (type=value_error.missing)
+response -> advice_text
+  field required (type=value_error.missing) (Error ID: 1745566686)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 259, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 145, in serialize_response
+    raise ValidationError(errors, field.type_)
+pydantic.error_wrappers.ValidationError: 3 validation errors for AdviseResponse
+response -> advice_type
+  field required (type=value_error.missing)
+response -> summary
+  field required (type=value_error.missing)
+response -> advice_text
+  field required (type=value_error.missing)
+2025-04-25 14:44:57,566 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-25 14:44:57,567 - uqifeed - INFO - Creating database indexes...
+2025-04-25 14:44:58,998 - uqifeed - INFO - Database indexes created successfully
+2025-04-26 14:35:27,985 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-26 14:35:27,987 - uqifeed - INFO - Creating database indexes...
+2025-04-26 14:35:28,966 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 14:03:19,667 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 14:03:19,668 - uqifeed - INFO - Creating database indexes...
+2025-04-28 14:03:20,550 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 14:03:20,971 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 14:37:25,057 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 14:37:25,059 - uqifeed - INFO - Creating database indexes...
+2025-04-28 14:37:25,878 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 14:37:26,263 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 14:46:36,498 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 14:46:36,499 - uqifeed - INFO - Creating database indexes...
+2025-04-28 14:46:37,428 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 14:46:37,873 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 14:49:22,819 - uqifeed - CRITICAL - Unhandled Exception: 3 validation errors for AdviseResponse
+response -> advice_type
+  field required (type=value_error.missing)
+response -> summary
+  field required (type=value_error.missing)
+response -> advice_text
+  field required (type=value_error.missing) (Error ID: 1745826562)
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Downloads\uqifeed_backend\src\utils\error_handling.py", line 83, in error_handling_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 84, in call_next
+    raise app_exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 259, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Downloads\uqifeed_backend\venv\Lib\site-packages\fastapi\routing.py", line 145, in serialize_response
+    raise ValidationError(errors, field.type_)
+pydantic.error_wrappers.ValidationError: 3 validation errors for AdviseResponse
+response -> advice_type
+  field required (type=value_error.missing)
+response -> summary
+  field required (type=value_error.missing)
+response -> advice_text
+  field required (type=value_error.missing)
+2025-04-28 14:51:14,257 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 14:51:14,257 - uqifeed - INFO - Creating database indexes...
+2025-04-28 14:51:15,092 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 14:51:15,488 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 15:01:15,098 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 15:01:15,099 - uqifeed - INFO - Creating database indexes...
+2025-04-28 15:01:16,019 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 15:01:16,465 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 15:07:15,655 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 15:07:15,656 - uqifeed - INFO - Creating database indexes...
+2025-04-28 15:07:16,482 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 15:07:16,871 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 15:31:21,654 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 15:31:21,655 - uqifeed - INFO - Creating database indexes...
+2025-04-28 15:31:24,204 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 15:31:26,362 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 15:31:31,445 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 15:31:31,445 - uqifeed - INFO - Creating database indexes...
+2025-04-28 15:31:32,474 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 15:31:32,935 - uqifeed - INFO - Meal type nutritional standards initialized successfully
+2025-04-28 15:41:30,533 - uqifeed - INFO - Successfully connected to MongoDB
+2025-04-28 15:41:30,534 - uqifeed - INFO - Creating database indexes...
+2025-04-28 15:41:31,495 - uqifeed - INFO - Database indexes created successfully
+2025-04-28 15:41:31,972 - uqifeed - INFO - Meal type nutritional standards initialized successfully

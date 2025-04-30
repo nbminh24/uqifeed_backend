@@ -1,110 +1,178 @@
 import os
-import asyncio
-import asyncpg
-from quart import Quart, request, jsonify
-from hypercorn.config import Config
-from hypercorn.asyncio import serve
+import shutil
+from fastapi import UploadFile, HTTPException, Depends
+from datetime import datetime
+from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
+import uuid
+from bson import ObjectId
 
-# Khởi tạo ứng dụng Quart
-app = Quart(__name__)
+from src.services.detection import process_food_image
+from src.services.database import save_food_and_ingredients
+from src.config.database import get_db, ingredients_collection
+from src.schemas.schemas import FoodCreate, FoodIngredientCreate
 
-# Cấu hình database
-DATABASE_URL = "postgresql://uqifeed:Mimikyu124.@localhost:5432/uqifeed_db"
+# Define DishRequest class
+class DishRequest(BaseModel):
+    user_id: Optional[str] = None
+    food_name: Optional[str] = None
+    meal_type: Optional[str] = None
+    eating_time: Optional[datetime] = None
+    ingredients: Optional[List] = None
+    image_url: Optional[str] = None
+    file_path: Optional[str] = None
+    image_path: Optional[str] = None
 
-# Hàm kết nối database (async)
-async def get_db():
-    return await asyncpg.connect(DATABASE_URL)
-
-async def ensure_ingredient_exists(db, ingredient_name, nutrition_info):
-    """Đảm bảo nguyên liệu tồn tại trong bảng ingredients và cập nhật nếu cần"""
+async def save_dish_to_db(dish_request: DishRequest, db = Depends(get_db)):
+    """
+    Process a dish image and save it to the database
+    
+    Args:
+        dish_request: Dish recognition request
+        db: Database session
+        
+    Returns:
+        Saved food data
+    """
     try:
-        ingredient = await db.fetchrow("SELECT id FROM ingredients WHERE name = $1", ingredient_name)
-        if not ingredient:
-            ingredient_id = await db.fetchval(
-                """
-                INSERT INTO ingredients (name, description, protein, fat, carbs, fiber)
-                VALUES ($1, $2, $3, $4, $5, $6)
-                RETURNING id
-                """,
-                ingredient_name, None,
-                float(nutrition_info["protein"]),
-                float(nutrition_info["fat"]),
-                float(nutrition_info["carbs"]),
-                float(nutrition_info["fiber"])
-            )
-            return ingredient_id
+        # Validate request
+        if not dish_request.image_url and not dish_request.file_path:
+            raise HTTPException(status_code=400, detail="Either image_url or file_path must be provided")
+        
+        # Process the image - recognize food and nutritional information
+        if dish_request.image_url:
+            food_data = await process_food_image(dish_request.image_url)
         else:
-            await db.execute(
-                """
-                UPDATE ingredients
-                SET protein = $2, fat = $3, carbs = $4, fiber = $5
-                WHERE id = $1
-                """,
-                ingredient["id"],
-                float(nutrition_info["protein"]),
-                float(nutrition_info["fat"]),
-                float(nutrition_info["carbs"]),
-                float(nutrition_info["fiber"])
-            )
-            return ingredient["id"]
+            food_data = await process_food_image(dish_request.file_path)
+        
+        # Save the food data to the database
+        saved_food = await save_food_and_ingredients(
+            user_id=dish_request.user_id,
+            food_data=food_data,
+            image_url=dish_request.image_url
+        )
+        
+        return {
+            "status": "success",
+            "message": "Dish saved successfully",
+            "food_id": saved_food["id"],
+            "food_name": saved_food["name"],
+            "total_calories": saved_food["total_calories"],
+            "total_protein": saved_food["total_protein"],
+            "total_fat": saved_food["total_fat"],
+            "total_carb": saved_food["total_carb"],
+            "total_fiber": saved_food["total_fiber"]
+        }
+    
     except Exception as e:
-        print(f"Lỗi trong ensure_ingredient_exists: {e}")
-        raise
+        raise HTTPException(status_code=500, detail=f"Error saving dish: {str(e)}")
 
-async def save_dish_to_db(dish_data):
-    """Lưu dữ liệu món ăn vào bảng dishes và dish_ingredients"""
+async def upload_dish_image(file: UploadFile) -> str:
+    """
+    Upload a dish image to the server
+    
+    Args:
+        file: Uploaded file
+        
+    Returns:
+        Path to the saved file
+    """
     try:
-        print("Đang lưu món ăn vào bảng dishes...")
-        db = await get_db()  # Sử dụng await thay vì async with
-
-        # Lưu món ăn vào bảng dishes
-        dish_id = await db.fetchval("""
-            INSERT INTO dishes (name, description, user_id, serves, image_url)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id
-        """, dish_data["name"], dish_data["description"], 1,  # Giả lập user_id = 1
-            int(dish_data["serves"]), dish_data.get("image_url", None))
-        print(f"Món ăn đã được lưu với ID: {dish_id}")
-
-        # Lưu nguyên liệu vào bảng dish_ingredients
-        for ingredient in dish_data["ingredients"]:
-            print(f"Đang xử lý nguyên liệu: {ingredient['name']}")
-            ingredient_id = await ensure_ingredient_exists(db, ingredient["name"], ingredient["nutrition"])
-            print(f"Nguyên liệu {ingredient['name']} có ID: {ingredient_id}")
-
-            # Lưu vào bảng dish_ingredients
-            await db.execute("""
-                INSERT INTO dish_ingredients (dish_id, ingredient_id, amount, unit)
-                VALUES ($1, $2, $3, $4)
-            """, dish_id, ingredient_id, float(ingredient["amount"]), ingredient["unit"])
-            print(f"Nguyên liệu {ingredient['name']} đã được lưu vào dish_ingredients.")
-
-        await db.close()  # Đóng kết nối sau khi sử dụng
-        return dish_id
+        # Create uploads directory if it doesn't exist
+        uploads_dir = "uploads"
+        if not os.path.exists(uploads_dir):
+            os.makedirs(uploads_dir)
+        
+        # Generate a unique filename with UUID
+        file_extension = os.path.splitext(file.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = os.path.join(uploads_dir, unique_filename)
+        
+        # Save the file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        return file_path
+    
     except Exception as e:
-        print(f"Lỗi trong save_dish_to_db: {e}")
-        raise
+        raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
-
-@app.route('/save-dish', methods=['POST'])
-async def save_dish_endpoint():
+async def manual_create_dish(
+    dish_data: FoodCreate,
+    user_id: str,
+    db
+) -> Dict[str, Any]:
+    """
+    Manually create a dish with ingredients
+    
+    Args:
+        dish_data: Food creation data
+        user_id: User ID
+        db: Database session
+        
+    Returns:
+        Dictionary with saved food information
+    """
     try:
-        dish_data = await request.get_json()
-        if not dish_data:
-            return jsonify({"status": "error", "message": "Dữ liệu không hợp lệ."}), 400
-
-        required_fields = ["name", "description", "ingredients", "serves"]
-        for field in required_fields:
-            if field not in dish_data:
-                return jsonify({"status": "error", "message": f"Thiếu trường bắt buộc: {field}"}), 400
-
-        dish_id = await save_dish_to_db(dish_data)
-        return jsonify({"status": "success", "dish_id": dish_id})
+        # Convert FoodCreate to the format expected by save_food_and_ingredients
+        food_data = {
+            "food_name": dish_data.name,
+            "total_calories": 0.0,  # Will be calculated from ingredients
+            "total_protein": 0.0,
+            "total_fat": 0.0,
+            "total_carb": 0.0,
+            "total_fiber": 0.0,
+            "ingredients": []
+        }
+        
+        # Add ingredients and calculate totals
+        for ingredient in dish_data.ingredients:
+            # Look up ingredient by ID
+            db_ingredient = await ingredients_collection.find_one({"_id": ObjectId(ingredient.ingredient_id)})
+            if not db_ingredient:
+                raise HTTPException(status_code=404, detail=f"Ingredient with ID {ingredient.ingredient_id} not found")
+            
+            # Calculate nutrient amounts based on quantity
+            quantity_ratio = ingredient.quantity / 100.0  # Nutrients are per 100 units
+            
+            ingredient_data = {
+                "name": db_ingredient["name"],
+                "quantity": ingredient.quantity,
+                "unit": db_ingredient["unit"],
+                "protein": db_ingredient["protein"],
+                "fat": db_ingredient["fat"],
+                "carb": db_ingredient["carb"],
+                "fiber": db_ingredient["fiber"],
+                "calories": db_ingredient["calories"]
+            }
+            
+            # Add to food totals
+            food_data["total_calories"] += db_ingredient["calories"] * quantity_ratio
+            food_data["total_protein"] += db_ingredient["protein"] * quantity_ratio
+            food_data["total_fat"] += db_ingredient["fat"] * quantity_ratio
+            food_data["total_carb"] += db_ingredient["carb"] * quantity_ratio
+            food_data["total_fiber"] += db_ingredient["fiber"] * quantity_ratio
+            
+            food_data["ingredients"].append(ingredient_data)
+        
+        # Save the food data to the database
+        saved_food = await save_food_and_ingredients(
+            user_id=user_id,
+            food_data=food_data,
+            image_url=dish_data.image_url
+        )
+        
+        return {
+            "status": "success",
+            "message": "Dish saved successfully",
+            "food_id": saved_food["id"],
+            "food_name": saved_food["name"],
+            "total_calories": saved_food["total_calories"],
+            "total_protein": saved_food["total_protein"],
+            "total_fat": saved_food["total_fat"],
+            "total_carb": saved_food["total_carb"],
+            "total_fiber": saved_food["total_fiber"]
+        }
+    
     except Exception as e:
-        print(f"Lỗi: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-if __name__ == '__main__':
-    config = Config()
-    config.bind = ["0.0.0.0:5000"]
-    asyncio.run(serve(app, config))
+        raise HTTPException(status_code=500, detail=f"Error creating dish: {str(e)}")
