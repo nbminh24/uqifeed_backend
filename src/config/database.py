@@ -4,9 +4,10 @@ from pymongo.collection import Collection
 from bson import ObjectId
 import os
 from dotenv import load_dotenv
-from config import config
+import config
 import asyncio
 import logging
+from datetime import datetime
 
 # Get logger
 from src.utils.error_handling import logger
@@ -14,8 +15,8 @@ from src.utils.error_handling import logger
 load_dotenv()
 
 # Database connection setup
-client = AsyncIOMotorClient(config.MONGODB_URL)
-db = client[config.DB_NAME]
+client = AsyncIOMotorClient(config.MONGO_URI)
+db = client[config.DATABASE_NAME]
 
 # Collections
 users_collection = db.users
@@ -32,7 +33,6 @@ weekly_reports_collection = db.weekly_reports
 weekly_ingredient_usages_collection = db.weekly_ingredient_usages
 weekly_report_comments_collection = db.weekly_report_comments
 meal_type_standards_collection = db.meal_type_standards
-measurement_units_collection = db.measurement_units
 notifications_collection = db.notifications
 notification_settings_collection = db.notification_settings
 
@@ -115,10 +115,6 @@ async def create_database_indexes():
         await weekly_ingredient_usages_collection.create_index([("report_id", ASCENDING), ("ingredient_name", ASCENDING)])
         await weekly_ingredient_usages_collection.create_index([("count", DESCENDING)])
         
-        # Measurement units collection indexes
-        await measurement_units_collection.create_index([("name", ASCENDING), ("user_id", ASCENDING)], unique=True)
-        await measurement_units_collection.create_index("is_default")
-        
         # Notifications collection indexes
         await notifications_collection.create_index([("user_id", ASCENDING), ("created_at", DESCENDING)])
         await notifications_collection.create_index([("user_id", ASCENDING), ("is_read", ASCENDING)])
@@ -153,76 +149,85 @@ async def initialize_meal_type_standards():
     """
     Initialize or update the nutritional standards for different meal types
     """
-    # Define default meal type standards
-    default_standards = [
-        {
-            "meal_type": "breakfast",
-            "calories_percentage": 25,
-            "protein_percentage": 25,
-            "fat_percentage": 25,
-            "carb_percentage": 30,
-            "fiber_percentage": 20,
-            "description": "Bữa sáng là bữa ăn quan trọng để cung cấp năng lượng cho cả ngày. Bữa sáng nên giàu protein để tạo cảm giác no lâu và carbohydrate phức hợp để cung cấp năng lượng ổn định."
-        },
-        {
-            "meal_type": "lunch",
-            "calories_percentage": 35,
-            "protein_percentage": 30,
-            "fat_percentage": 30,
-            "carb_percentage": 35,
-            "fiber_percentage": 35,
-            "description": "Bữa trưa nên cân bằng giữa protein, chất béo và carbohydrate để duy trì năng lượng qua buổi chiều. Đây là bữa ăn chính với lượng calories cao nhất trong ngày."
-        },
-        {
-            "meal_type": "dinner",
-            "calories_percentage": 30,
-            "protein_percentage": 35,
-            "fat_percentage": 30,
-            "carb_percentage": 25,
-            "fiber_percentage": 30,
-            "description": "Bữa tối nên tập trung vào protein và chất xơ, giảm nhẹ carbohydrate để tránh tăng đường huyết khi ngủ. Nên ăn ít nhất 2-3 giờ trước khi đi ngủ."
-        },
-        {
-            "meal_type": "snack",
-            "calories_percentage": 5,
-            "protein_percentage": 5,
-            "fat_percentage": 5,
-            "carb_percentage": 5,
-            "fiber_percentage": 5,
-            "description": "Bữa phụ nên nhẹ nhàng, giàu protein và chất xơ để duy trì cảm giác no giữa các bữa chính. Nên tránh đồ ăn vặt giàu đường và chất béo."
-        },
-        {
-            "meal_type": "drinks",
-            "calories_percentage": 3,
-            "protein_percentage": 2,
-            "fat_percentage": 3,
-            "carb_percentage": 3,
-            "fiber_percentage": 1,
-            "description": "Nước uống nên ưu tiên không calo như nước lọc, trà xanh. Hạn chế đồ uống có đường, nếu cần bổ sung năng lượng từ đồ uống, nên chọn sinh tố từ nguyên liệu tự nhiên."
-        },
-        {
-            "meal_type": "light_meal",
-            "calories_percentage": 15,
-            "protein_percentage": 15,
-            "fat_percentage": 15,
-            "carb_percentage": 15,
-            "fiber_percentage": 15,
-            "description": "Bữa ăn nhẹ lớn hơn bữa phụ nhưng nhỏ hơn bữa chính, thích hợp cho bữa sáng muộn hoặc bữa tối sớm. Nên cân bằng các chất dinh dưỡng và tránh thực phẩm chế biến."
-        }
-    ]
-    
-    # Update or insert meal type standards
-    for standard in default_standards:
-        # Check if standard exists
-        existing = await meal_type_standards_collection.find_one({"meal_type": standard["meal_type"]})
-        if existing:
-            # Update existing standard
-            await meal_type_standards_collection.update_one(
-                {"meal_type": standard["meal_type"]},
-                {"$set": standard}
-            )
-        else:
-            # Insert new standard
-            await meal_type_standards_collection.insert_one(standard)
-    
-    logger.info("Meal type nutritional standards initialized successfully")
+    try:
+        # Define default meal type standards
+        default_standards = [
+            {
+                "meal_type": "breakfast",  # Giá trị phải nhất quán với MealTypeEnum.BREAKFAST.value
+                "calories_percentage": 25,
+                "protein_percentage": 25,
+                "fat_percentage": 25,
+                "carb_percentage": 30,
+                "fiber_percentage": 20,
+                "description": "Bữa sáng là bữa ăn quan trọng để cung cấp năng lượng cho cả ngày. Bữa sáng nên giàu protein để tạo cảm giác no lâu và carbohydrate phức hợp để cung cấp năng lượng ổn định."
+            },
+            {
+                "meal_type": "lunch",  # Giá trị phải nhất quán với MealTypeEnum.LUNCH.value
+                "calories_percentage": 35,
+                "protein_percentage": 30,
+                "fat_percentage": 35,
+                "carb_percentage": 35,
+                "fiber_percentage": 40,
+                "description": "Bữa trưa nên cung cấp đủ năng lượng cho các hoạt động buổi chiều. Đây là bữa ăn chính trong ngày, nên cân đối giữa protein, chất béo và carbohydrate."
+            },
+            {
+                "meal_type": "dinner",  # Giá trị phải nhất quán với MealTypeEnum.DINNER.value
+                "calories_percentage": 30,
+                "protein_percentage": 35,
+                "fat_percentage": 30,
+                "carb_percentage": 25,
+                "fiber_percentage": 30,
+                "description": "Bữa tối nên nhẹ nhàng và dễ tiêu hóa, tránh ăn quá nhiều carbohydrate. Nên ưu tiên protein và rau xanh, hạn chế chất béo và đường."
+            },
+            {
+                "meal_type": "snack",  # Giá trị phải nhất quán với MealTypeEnum.SNACK.value
+                "calories_percentage": 10,
+                "protein_percentage": 10,
+                "fat_percentage": 10,
+                "carb_percentage": 10,
+                "fiber_percentage": 10,
+                "description": "Bữa phụ nên nhẹ nhàng và giàu dinh dưỡng, tránh thức ăn nhiều đường và chất béo. Nên chọn trái cây, hạt, sữa chua hoặc protein nhẹ."
+            },
+            {
+                "meal_type": "drinks",  # Giá trị phải nhất quán với MealTypeEnum.DRINKS.value
+                "calories_percentage": 5,
+                "protein_percentage": 0,
+                "fat_percentage": 0,
+                "carb_percentage": 0,
+                "fiber_percentage": 0,
+                "description": "Nên ưu tiên nước lọc, trà xanh không đường, nước ép trái cây tự nhiên. Hạn chế đồ uống có đường và cồn."
+            },
+            {
+                "meal_type": "light_meal",  # Giá trị phải nhất quán với MealTypeEnum.LIGHT_MEAL.value
+                "calories_percentage": 15,
+                "protein_percentage": 15,
+                "fat_percentage": 15,
+                "carb_percentage": 15,
+                "fiber_percentage": 15,
+                "description": "Bữa ăn nhẹ thích hợp cho buổi sáng muộn hoặc chiều tối. Nên cân đối các chất dinh dưỡng, ưu tiên thực phẩm dễ tiêu hóa."
+            }
+        ]
+        
+        # For each default standard, either create or update
+        for standard in default_standards:
+            # Check if standard exists for this meal type
+            existing = await meal_type_standards_collection.find_one({"meal_type": standard["meal_type"]})
+            
+            if existing:
+                # Update existing standard
+                await meal_type_standards_collection.update_one(
+                    {"_id": existing["_id"]},
+                    {"$set": {**standard, "updated_at": datetime.utcnow()}}
+                )
+                logger.info(f"Updated meal type standard for {standard['meal_type']}")
+            else:
+                # Create new standard
+                standard["created_at"] = datetime.utcnow()
+                standard["updated_at"] = datetime.utcnow()
+                await meal_type_standards_collection.insert_one(standard)
+                logger.info(f"Created meal type standard for {standard['meal_type']}")
+                
+        return True
+    except Exception as e:
+        logger.error(f"Error initializing meal type standards: {str(e)}")
+        raise

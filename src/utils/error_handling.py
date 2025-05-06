@@ -1,20 +1,29 @@
 import logging
+from logging.handlers import RotatingFileHandler
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Dict, Any, Optional, Union, Callable
 import traceback
 import json
 import time
 from datetime import datetime
 import os
+import uuid
+import sys
+
+# Configure logging with rotating file handler
+log_file_path = "app_errors.log"
+max_log_size = 10 * 1024 * 1024  # 10MB
+backup_count = 5  # Keep 5 backup logs
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("app_errors.log"),
-        logging.StreamHandler()
+        RotatingFileHandler(log_file_path, maxBytes=max_log_size, backupCount=backup_count),
+        logging.StreamHandler(sys.stdout)
     ]
 )
 
@@ -163,20 +172,76 @@ async def error_handling_middleware(request: Request, call_next: Callable):
         )
 
 
+class SecureHeadersMiddleware(BaseHTTPMiddleware):
+    """Middleware to add security-related headers to all responses"""
+    
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # Add security headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
+        return response
+
+
+class APIMetricsMiddleware(BaseHTTPMiddleware):
+    """Middleware to track API metrics and performance"""
+    
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        
+        # Track route processing time
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        
+        # Add processing time header
+        response.headers["X-Process-Time"] = str(process_time)
+        
+        # Log slow requests (over 1 second) for optimization
+        if process_time > 1:
+            logger.warning(
+                f"Slow request: {request.method} {request.url.path} - {process_time:.2f}s"
+            )
+            
+        return response
+
+
 # Helper functions for exception handling
 def handle_api_error(func):
     """
     Decorator for API route handlers to handle exceptions consistently
+    Works with both async and sync functions
     """
-    async def wrapper(*args, **kwargs):
-        try:
-            return await func(*args, **kwargs)
-        except APIError:
-            # Re-raise our custom exceptions for the middleware to handle
-            raise
-        except Exception as e:
-            # Convert generic exceptions to APIError
-            logger.error(f"Error in {func.__name__}: {str(e)}", exc_info=True)
-            raise APIError(f"Error processing request: {str(e)}")
+    import inspect
     
-    return wrapper
+    if inspect.iscoroutinefunction(func):
+        # For async functions
+        async def async_wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except APIError:
+                # Re-raise our custom exceptions for the middleware to handle
+                raise
+            except Exception as e:
+                # Convert generic exceptions to APIError
+                logger.error(f"Error in {func.__name__}: {str(e)}", exc_info=True)
+                raise APIError(f"Error processing request: {str(e)}")
+        return async_wrapper
+    else:
+        # For sync functions
+        def sync_wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except APIError:
+                # Re-raise our custom exceptions for the middleware to handle
+                raise
+            except Exception as e:
+                # Convert generic exceptions to APIError
+                logger.error(f"Error in {func.__name__}: {str(e)}", exc_info=True)
+                raise APIError(f"Error processing request: {str(e)}")
+        return sync_wrapper
