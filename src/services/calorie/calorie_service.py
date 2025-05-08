@@ -36,7 +36,7 @@ async def calculate_dish_calories(food_id: str, user_id: str) -> Dict:
 
         total_protein = 0
         total_fat = 0
-        total_carbs = 0
+        total_carb = 0
         total_calories = 0
 
         # Calculate nutrients for each ingredient
@@ -49,14 +49,14 @@ async def calculate_dish_calories(food_id: str, user_id: str) -> Dict:
             # Sum up total nutrients
             total_protein += protein
             total_fat += fat
-            total_carbs += carbs
+            total_carb += carbs
             total_calories += calories
 
         return {
             "food_id": food_id,
             "total_protein": total_protein,
             "total_fat": total_fat,
-            "total_carbs": total_carbs,
+            "total_carb": total_carb,
             "total_calories": total_calories
         }
     except Exception as e:
@@ -244,104 +244,104 @@ async def generate_weaknesses(comparison: Dict) -> List[str]:
     
     return weaknesses
 
-async def update_daily_report(user_id: str, report_date: date) -> Dict:
+async def update_daily_report(user_id: str, report_date: Optional[date] = None) -> Dict:
     """
     Update or generate a daily nutrition report
     
     Args:
         user_id: The ID of the user
-        report_date: The date for the report
+        report_date: The date for the report (default: today)
         
     Returns:
         The daily report
     """
-    # Convert date to datetime range
-    day_start = datetime.combine(report_date, datetime.min.time())
-    day_end = datetime.combine(report_date, datetime.max.time())
-    
-    # Get all foods for the date
-    foods = await foods_collection.find({
-        "user_id": user_id,
-        "eating_time": {"$gte": day_start, "$lte": day_end}
-    }).to_list(length=100)
-    
-    # Calculate totals
-    total_calories = sum(food.get("total_calories", 0) for food in foods)
-    total_protein = sum(food.get("total_protein", 0) for food in foods)
-    total_fat = sum(food.get("total_fat", 0) for food in foods)
-    total_carb = sum(food.get("total_carb", 0) for food in foods)
-    total_fiber = sum(food.get("total_fiber", 0) for food in foods)
-    
-    # Get target
-    target = await nutrition_targets_collection.find_one({"user_id": user_id})
-    if not target:
-        raise HTTPException(status_code=404, detail="Nutrition target not found")
-    
-    # Calculate percentages
-    calories_percent = round((total_calories / target.get("calories", 1)) * 100) if target.get("calories") else 0
-    protein_percent = round((total_protein / target.get("protein", 1)) * 100) if target.get("protein") else 0
-    fat_percent = round((total_fat / target.get("fat", 1)) * 100) if target.get("fat") else 0
-    carb_percent = round((total_carb / target.get("carb", 1)) * 100) if target.get("carb") else 0
-    fiber_percent = round((total_fiber / target.get("fiber", 1)) * 100) if target.get("fiber") else 0
-    
-    # Build report
-    report = {
-        "date": report_date.isoformat(),
-        "user_id": user_id,
-        "total_calories": total_calories,
-        "total_protein": total_protein,
-        "total_fat": total_fat,
-        "total_carb": total_carb,
-        "total_fiber": total_fiber,
-        "target_calories": target.get("calories", 0),
-        "target_protein": target.get("protein", 0),
-        "target_fat": target.get("fat", 0),
-        "target_carb": target.get("carb", 0),
-        "target_fiber": target.get("fiber", 0),
-        "calories_percent": calories_percent,
-        "protein_percent": protein_percent,
-        "fat_percent": fat_percent,
-        "carb_percent": carb_percent,
-        "fiber_percent": fiber_percent,
-        "meals": []
-    }
-    
-    # Group foods by meal type
-    breakfast = [f for f in foods if f.get("meal_type") == "breakfast"]
-    lunch = [f for f in foods if f.get("meal_type") == "lunch"]
-    dinner = [f for f in foods if f.get("meal_type") == "dinner"]
-    snacks = [f for f in foods if f.get("meal_type") == "snack"]
-    
-    # Add meals data
-    if breakfast:
-        report["meals"].append({
-            "type": "breakfast",
-            "calories": sum(f.get("total_calories", 0) for f in breakfast),
-            "foods": [{"id": str(f["_id"]), "name": f.get("name", "Unknown Food")} for f in breakfast]
-        })
-    
-    if lunch:
-        report["meals"].append({
-            "type": "lunch",
-            "calories": sum(f.get("total_calories", 0) for f in lunch),
-            "foods": [{"id": str(f["_id"]), "name": f.get("name", "Unknown Food")} for f in lunch]
-        })
-    
-    if dinner:
-        report["meals"].append({
-            "type": "dinner",
-            "calories": sum(f.get("total_calories", 0) for f in dinner),
-            "foods": [{"id": str(f["_id"]), "name": f.get("name", "Unknown Food")} for f in dinner]
-        })
-    
-    if snacks:
-        report["meals"].append({
-            "type": "snack",
-            "calories": sum(f.get("total_calories", 0) for f in snacks),
-            "foods": [{"id": str(f["_id"]), "name": f.get("name", "Unknown Food")} for f in snacks]
-        })
-    
-    return report
+    try:
+        # Parse date or use today
+        if not report_date:
+            report_date = datetime.now().date()
+            
+        # Convert date to datetime range
+        day_start = datetime.combine(report_date, datetime.min.time())
+        day_end = datetime.combine(report_date, datetime.max.time())
+        
+        # Get all foods for the date
+        foods = await foods_collection.find({
+            "user_id": user_id,
+            "eating_time": {"$gte": day_start, "$lte": day_end}
+        }).to_list(length=100)
+        
+        # Calculate totals
+        total_calories = sum(food.get("total_calories", 0) for food in foods)
+        total_protein = sum(food.get("total_protein", 0) for food in foods)
+        total_fat = sum(food.get("total_fat", 0) for food in foods)
+        total_carb = sum(food.get("total_carb", 0) for food in foods)
+        total_fiber = sum(food.get("total_fiber", 0) for food in foods)
+        
+        # Get target
+        target = await nutrition_targets_collection.find_one({"user_id": user_id})
+        
+        # Calculate percentages
+        calories_percent = 0
+        protein_percent = 0
+        fat_percent = 0
+        carb_percent = 0
+        fiber_percent = 0
+        
+        if target:
+            calories_percent = round((total_calories / target.get("calories", 1)) * 100) if target.get("calories") else 0
+            protein_percent = round((total_protein / target.get("protein", 1)) * 100) if target.get("protein") else 0
+            fat_percent = round((total_fat / target.get("fat", 1)) * 100) if target.get("fat") else 0
+            carb_percent = round((total_carb / target.get("carb", 1)) * 100) if target.get("carb") else 0
+            fiber_percent = round((total_fiber / target.get("fiber", 1)) * 100) if target.get("fiber") else 0
+        else:
+            # If no target found, we can proceed without percentages
+            pass
+        
+        # Build report
+        report = {
+            "date": report_date.isoformat(),
+            "user_id": user_id,
+            "total_calories": total_calories,
+            "total_protein": total_protein,
+            "total_fat": total_fat,
+            "total_carb": total_carb,
+            "total_fiber": total_fiber,
+            "calories_percent": calories_percent,
+            "protein_percent": protein_percent,
+            "fat_percent": fat_percent,
+            "carb_percent": carb_percent,
+            "fiber_percent": fiber_percent,
+            "meals": []
+        }
+        
+        # Add target information if available
+        if target:
+            report["target_calories"] = target.get("calories", 0)
+            report["target_protein"] = target.get("protein", 0)
+            report["target_fat"] = target.get("fat", 0)
+            report["target_carb"] = target.get("carb", 0)
+            report["target_fiber"] = target.get("fiber", 0)
+        
+        # Group foods by meal type
+        meal_types = {}
+        for food in foods:
+            meal_type = food.get("meal_type", "other")
+            if meal_type not in meal_types:
+                meal_types[meal_type] = []
+            meal_types[meal_type].append(food)
+        
+        # Add meals data
+        for meal_type, meal_foods in meal_types.items():
+            report["meals"].append({
+                "type": meal_type,
+                "calories": sum(f.get("total_calories", 0) for f in meal_foods),
+                "foods": [{"id": str(f["_id"]), "name": f.get("name", "Unknown Food")} for f in meal_foods]
+            })
+        
+        return report
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating daily report: {str(e)}")
 
 async def generate_weekly_report(user_id: str, week_start_date: date) -> Dict:
     """
@@ -538,8 +538,8 @@ async def get_weekly_statistics(
         weekly_avg_score = sum(daily_scores) / 7 if sum(daily_scores) > 0 else 0
         
         # Calculate BMI
-        height_m = profile["height"] / 100  # Convert cm to m
-        weight = profile["weight"]
+        height_m = profile.get("height", 170) / 100  # Convert cm to m
+        weight = profile.get("weight", 70)
         bmi = round(weight / (height_m * height_m), 1)
         
         # Get food diversity information
@@ -553,11 +553,11 @@ async def get_weekly_statistics(
             })
         
         # Calculate deviations from target
-        calories_deviation = round(((weekly_avg_calories / target["calories"]) - 1) * 100) if target["calories"] else 0
-        protein_deviation = round(((weekly_avg_protein / target["protein"]) - 1) * 100) if target["protein"] else 0
-        fat_deviation = round(((weekly_avg_fat / target["fat"]) - 1) * 100) if target["fat"] else 0
-        carb_deviation = round(((weekly_avg_carb / target["carb"]) - 1) * 100) if target["carb"] else 0
-        fiber_deviation = round(((weekly_avg_fiber / target["fiber"]) - 1) * 100) if target["fiber"] else 0
+        calories_deviation = round(((weekly_avg_calories / target.get("calories", 1)) - 1) * 100) if target.get("calories") else 0
+        protein_deviation = round(((weekly_avg_protein / target.get("protein", 1)) - 1) * 100) if target.get("protein") else 0
+        fat_deviation = round(((weekly_avg_fat / target.get("fat", 1)) - 1) * 100) if target.get("fat") else 0
+        carb_deviation = round(((weekly_avg_carb / target.get("carb", 1)) - 1) * 100) if target.get("carb") else 0
+        fiber_deviation = round(((weekly_avg_fiber / target.get("fiber", 1)) - 1) * 100) if target.get("fiber") else 0
         
         # Tạo đánh giá dinh dưỡng cho báo cáo tuần
         weekly_meal_data = {
@@ -575,7 +575,7 @@ async def get_weekly_statistics(
             "calories": weekly_evaluation.get("calorie_comment", ""),
             "protein": weekly_evaluation.get("macro_evaluations", {}).get("protein", {}).get("comment", ""),
             "fat": weekly_evaluation.get("macro_evaluations", {}).get("fat", {}).get("comment", ""),
-            "carb": weekly_evaluation.get("macro_evaluations", {}).get("carbs", {}).get("comment", ""),
+            "carb": weekly_evaluation.get("macro_evaluations", {}).get("carb", {}).get("comment", ""),
             "fiber": weekly_evaluation.get("macro_evaluations", {}).get("fiber", {}).get("comment", "")
         }
         
@@ -600,35 +600,35 @@ async def get_weekly_statistics(
             "calories": {
                 "daily_values": daily_calories,
                 "average": round(weekly_avg_calories),
-                "target": target["calories"],
+                "target": target.get("calories", 2000),
                 "deviation": calories_deviation,
                 "review": macro_reviews["calories"],
             },
             "protein": {
                 "daily_values": daily_protein,
                 "average": round(weekly_avg_protein, 1),
-                "target": target["protein"],
+                "target": target.get("protein", 60),
                 "deviation": protein_deviation,
                 "review": macro_reviews["protein"],
             },
             "fat": {
                 "daily_values": daily_fat,
                 "average": round(weekly_avg_fat, 1),
-                "target": target["fat"],
+                "target": target.get("fat", 70),
                 "deviation": fat_deviation,
                 "review": macro_reviews["fat"],
             },
             "carb": {
                 "daily_values": daily_carb,
                 "average": round(weekly_avg_carb, 1),
-                "target": target["carb"],
+                "target": target.get("carb", 300),
                 "deviation": carb_deviation,
                 "review": macro_reviews["carb"],
             },
             "fiber": {
                 "daily_values": daily_fiber,
                 "average": round(weekly_avg_fiber, 1),
-                "target": target["fiber"],
+                "target": target.get("fiber", 25),
                 "deviation": fiber_deviation,
                 "review": macro_reviews["fiber"],
             },
@@ -718,105 +718,6 @@ async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calculating meal calories: {str(e)}")
 
-async def calculate_total_nutrition(
-    user_id: str, 
-    date_str: Optional[str] = None
-) -> Dict:
-    """
-    Calculate total nutrition for a specific date
-    
-    Args:
-        user_id: The ID of the user
-        date_str: Date string in YYYY-MM-DD format (default: today)
-        
-    Returns:
-        Total nutrition information
-    """
-    try:
-        # Parse date or use today
-        if date_str:
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-        else:
-            date_obj = datetime.now().date()
-        
-        # Create datetime range for the day
-        day_start = datetime.combine(date_obj, datetime.min.time())
-        day_end = datetime.combine(date_obj, datetime.max.time())
-        
-        # Query all foods for the day
-        query = {
-            "user_id": user_id,
-            "eating_time": {"$gte": day_start, "$lte": day_end}
-        }
-        
-        # Get foods
-        foods = await foods_collection.find(query).to_list(length=100)
-        
-        # Calculate totals
-        total_calories = sum(food.get("total_calories", 0) for food in foods)
-        total_protein = sum(food.get("total_protein", 0) for food in foods)
-        total_fat = sum(food.get("total_fat", 0) for food in foods)
-        total_carb = sum(food.get("total_carb", 0) for food in foods)
-        total_fiber = sum(food.get("total_fiber", 0) for food in foods)
-        
-        # Get target for comparison
-        target = await nutrition_targets_collection.find_one({"user_id": user_id})
-        
-        # Calculate percentages if target exists
-        calories_percent = 0
-        protein_percent = 0
-        fat_percent = 0
-        carb_percent = 0
-        fiber_percent = 0
-        
-        if target:
-            calories_percent = round((total_calories / target.get("calories", 1)) * 100) if target.get("calories") else 0
-            protein_percent = round((total_protein / target.get("protein", 1)) * 100) if target.get("protein") else 0
-            fat_percent = round((total_fat / target.get("fat", 1)) * 100) if target.get("fat") else 0
-            carb_percent = round((total_carb / target.get("carb", 1)) * 100) if target.get("carb") else 0
-            fiber_percent = round((total_fiber / target.get("fiber", 1)) * 100) if target.get("fiber") else 0
-        
-        # Group by meal type
-        meals = {}
-        for food in foods:
-            meal_type = food.get("meal_type", "other")
-            if meal_type not in meals:
-                meals[meal_type] = {
-                    "total_calories": 0,
-                    "foods": []
-                }
-            
-            meals[meal_type]["total_calories"] += food.get("total_calories", 0)
-            meals[meal_type]["foods"].append({
-                "id": str(food["_id"]),
-                "name": food.get("name", "Unknown Food"),
-                "calories": food.get("total_calories", 0)
-            })
-        
-        return {
-            "date": date_obj.isoformat(),
-            "total_calories": total_calories,
-            "total_protein": total_protein,
-            "total_fat": total_fat,
-            "total_carb": total_carb,
-            "total_fiber": total_fiber,
-            "calories_percent": calories_percent,
-            "protein_percent": protein_percent,
-            "fat_percent": fat_percent,
-            "carb_percent": carb_percent,
-            "fiber_percent": fiber_percent,
-            "meals": [
-                {
-                    "type": meal_type,
-                    "calories": meal_data["total_calories"],
-                    "foods": meal_data["foods"]
-                }
-                for meal_type, meal_data in meals.items()
-            ]
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error calculating total nutrition: {str(e)}")
-
 async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Dict[str, Any]:
     """
     Đánh giá dinh dưỡng của bữa ăn dựa trên loại bữa ăn và tỷ lệ macro
@@ -838,40 +739,23 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
             
         daily_calories = target.get("calories", 2000)
         
-        # Phân bổ calo theo loại bữa ăn
-        meal_calories_distribution = {
-            "breakfast": 0.25,  # 25% tổng calo ngày
-            "lunch": 0.40,      # 40% tổng calo ngày
-            "dinner": 0.35,     # 35% tổng calo ngày
-        }
+        # Lấy tiêu chuẩn dinh dưỡng cho loại bữa ăn
+        meal_standard = await get_meal_type_standard(meal_type)
         
         # Tỷ lệ macro trong mỗi bữa ăn
-        meal_macro_ratios = {
-            "breakfast": {"carbs": 0.35, "protein": 0.30, "fat": 0.35},
-            "lunch": {"carbs": 0.40, "protein": 0.30, "fat": 0.30},
-            "dinner": {"carbs": 0.25, "protein": 0.35, "fat": 0.40},
-            "snack": {"carbs": 0.45, "protein": 0.30, "fat": 0.25},
-            "light_meal": {"carbs": 0.50, "protein": 0.40, "fat": 0.10},
-            "drinks": {"max_calories": 20}  # kcal/100ml
-        }
+        target_ratios = meal_standard["macro_ratios"]
         
-        # Tính toán calo mục tiêu cho bữa ăn chính
+        # Tính toán calo mục tiêu cho bữa ăn
         target_meal_calories = 0
-        if meal_type in meal_calories_distribution:
-            target_meal_calories = daily_calories * meal_calories_distribution[meal_type]
+        if meal_standard.get("calories_percentage"):
+            target_meal_calories = daily_calories * (meal_standard["calories_percentage"] / 100)
+        elif meal_type == "drinks":
+            volume_ml = meal_data.get("volume_ml", 100)
+            target_meal_calories = meal_standard.get("max_calories_per_100ml", 20) * (volume_ml / 100)
+        elif "max_calories" in meal_standard:
+            target_meal_calories = meal_standard["max_calories"]
         else:
-            # Cho các bữa phụ
-            if meal_type == "snack":
-                target_meal_calories = 200  # <200 kcal
-            elif meal_type == "light_meal":
-                target_meal_calories = 250  # <250 kcal
-            elif meal_type == "drinks":
-                target_meal_calories = 20   # <20 kcal/100ml
-                # Thể tích mặc định là 100ml, có thể điều chỉnh nếu có thông tin
-                volume_ml = meal_data.get("volume_ml", 100)
-                target_meal_calories = target_meal_calories * (volume_ml / 100)
-            else:
-                target_meal_calories = 200  # Mặc định cho các loại bữa ăn khác
+            target_meal_calories = 200  # Mặc định cho các loại bữa ăn khác
         
         # Lấy thông tin dinh dưỡng thực tế của bữa ăn
         actual_calories = meal_data.get("total_calories", 0)
@@ -904,9 +788,6 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
         actual_fat_ratio = fat_cals / total_macros_cals if total_macros_cals > 0 else 0
         actual_carb_ratio = carb_cals / total_macros_cals if total_macros_cals > 0 else 0
         
-        # Tỷ lệ mục tiêu macro cho bữa ăn này
-        target_ratios = meal_macro_ratios.get(meal_type, {"carbs": 0.4, "protein": 0.3, "fat": 0.3})
-        
         # Tính toán điểm và mức độ phù hợp với mục tiêu
         score = 100  # Điểm mặc định
         
@@ -914,7 +795,7 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
         calorie_ratio = actual_calories / target_meal_calories if target_meal_calories > 0 else 1
         calorie_evaluation = ""
         
-        if meal_type in meal_calories_distribution:  # Chỉ đánh giá calo cho các bữa chính
+        if meal_standard.get("calories_percentage"):  # Chỉ đánh giá calo cho các bữa chính
             if calorie_ratio < 0.8:
                 calorie_evaluation = "Thấp hơn mục tiêu"
                 score -= 15
@@ -924,15 +805,17 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
             else:
                 calorie_evaluation = "Phù hợp với mục tiêu"
         else:  # Đánh giá calo cho bữa phụ
-            if meal_type == "snack" and actual_calories > 200:
-                calorie_evaluation = "Vượt quá giới hạn cho bữa ăn vặt (200 kcal)"
+            if "max_calories" in meal_standard and actual_calories > meal_standard["max_calories"]:
+                calorie_evaluation = f"Vượt quá giới hạn ({meal_standard['max_calories']} kcal)"
                 score -= 15
-            elif meal_type == "light_meal" and actual_calories > 250:
-                calorie_evaluation = "Vượt quá giới hạn cho bữa ăn nhẹ (250 kcal)"
-                score -= 15
-            elif meal_type == "drinks" and actual_calories > target_meal_calories:
-                calorie_evaluation = f"Vượt quá giới hạn cho đồ uống (20 kcal/100ml)"
-                score -= 15
+            elif meal_type == "drinks" and "max_calories_per_100ml" in meal_standard:
+                volume_ml = meal_data.get("volume_ml", 100)
+                max_cals = meal_standard["max_calories_per_100ml"] * (volume_ml / 100)
+                if actual_calories > max_cals:
+                    calorie_evaluation = f"Vượt quá giới hạn cho đồ uống ({meal_standard['max_calories_per_100ml']} kcal/100ml)"
+                    score -= 15
+                else:
+                    calorie_evaluation = "Phù hợp với giới hạn calo"
             else:
                 calorie_evaluation = "Phù hợp với giới hạn calo"
                 
@@ -963,7 +846,7 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
                     "moderate": "Chất béo hơi thấp. Thêm dầu olive, hạt hoặc bơ đậu phộng để cải thiện hấp thu vitamin và hormone."
                 }
             },
-            "carb": {
+            "carbs": {
                 "balanced": "Carb ở mức cân đối, cung cấp năng lượng tức thì và dự trữ glycogen cho hoạt động thể chất.",
                 "excessive": {
                     "high": "Carb quá cao, dễ gây tăng đường huyết và tích trữ mỡ. Thích hợp nếu vận động mạnh, nếu không nên giảm khẩu phần.",
@@ -1102,54 +985,22 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
         # Đảm bảo điểm số nằm trong khoảng 0-100
         score = max(0, min(100, score))
         
-        # Tạo danh sách điểm mạnh và điểm yếu
-        strengths = []
-        weaknesses = []
+        # Tạo danh sách điểm mạnh và điểm yếu từ hàm đánh giá
+        strengths = await generate_strengths({
+            "diff_protein": protein_percentage,
+            "diff_fat": fat_percentage,
+            "diff_carb": carb_percentage,
+            "diff_fiber": fiber_percentage,
+            "diff_calories": calorie_percentage
+        })
         
-        # Xác định điểm mạnh
-        if 90 <= calorie_percentage <= 110:
-            strengths.append("Lượng calo phù hợp với mục tiêu")
-        elif calorie_percentage < 90 and "giảm cân" in meal_data.get("goal", "").lower():
-            strengths.append("Lượng calo thấp hỗ trợ mục tiêu giảm cân")
-            
-        if meal_type in meal_macro_ratios:
-            if "protein" in macro_evaluations and macro_evaluations["protein"]["evaluation"] == "Cân đối tốt":
-                strengths.append(f"Protein phù hợp cho bữa {meal_type}")
-            elif "protein" in macro_evaluations and macro_evaluations["protein"]["percentage_of_daily"] > 100:
-                strengths.append("Hàm lượng protein cao tốt cho xây dựng cơ bắp")
-                
-            for macro in ["carbs", "fat"]:
-                if macro in macro_evaluations and macro_evaluations[macro]["evaluation"] == "Cân đối tốt":
-                    strengths.append(f"Tỉ lệ {macro_evaluations[macro]['name']} cân đối")
-                    
-            if "fiber" in macro_evaluations and macro_evaluations["fiber"]["percentage_of_daily"] >= 100:
-                strengths.append("Hàm lượng chất xơ tốt cho tiêu hóa")
-        
-        # Xác định điểm yếu
-        if calorie_percentage > 130:
-            weaknesses.append("Lượng calo cao hơn mức khuyến nghị")
-        elif calorie_percentage < 70 and ("tăng cân" in meal_data.get("goal", "").lower() or "tăng cơ" in meal_data.get("goal", "").lower()):
-            weaknesses.append("Lượng calo thấp không hỗ trợ mục tiêu tăng cân/cơ")
-            
-        for macro in ["protein", "carbs", "fat", "fiber"]:
-            if macro in macro_evaluations:
-                if macro_evaluations[macro]["evaluation"] not in ["Cân đối tốt", "Gần như cân đối"]:
-                    if macro_evaluations[macro]["percentage_of_daily"] < 50:
-                        weaknesses.append(f"Thiếu {macro_evaluations[macro]['name']} đáng kể")
-                    elif macro_evaluations[macro]["percentage_of_daily"] > 150:
-                        weaknesses.append(f"Thừa {macro_evaluations[macro]['name']} đáng kể")
-        
-        # Đảm bảo có ít nhất một điểm mạnh và điểm yếu
-        if not strengths:
-            strengths.append("Góp phần vào dinh dưỡng hàng ngày của bạn")
-        if not weaknesses and score < 90:
-            weaknesses.append("Có sự mất cân đối nhẹ trong các chất dinh dưỡng")
-        elif not weaknesses:
-            weaknesses.append("Không có vấn đề dinh dưỡng đáng kể")
-            
-        # Giới hạn số lượng điểm yếu
-        if len(weaknesses) > 3:
-            weaknesses = weaknesses[:3]
+        weaknesses = await generate_weaknesses({
+            "diff_protein": protein_percentage,
+            "diff_fat": fat_percentage,
+            "diff_carb": carb_percentage,
+            "diff_fiber": fiber_percentage,
+            "diff_calories": calorie_percentage
+        })
             
         return {
             "meal_type": meal_type,
@@ -1163,6 +1014,7 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
             "nutrition_score": round(score),
             "strengths": strengths,
             "weaknesses": weaknesses,
+            "meal_standard_description": meal_standard["description"],
             "daily_targets": {
                 "calories": round(daily_calories),
                 "protein": round(daily_protein),
@@ -1230,3 +1082,4 @@ async def get_meal_type_standard(meal_type: str) -> Dict:
     standard["description"] = description_map.get(meal_type, "Không có mô tả cho loại bữa ăn này.")
     
     return standard
+

@@ -10,7 +10,8 @@ from src.services.calorie.calorie_service import (
     get_weekly_statistics,
     get_bmi_category,
     calculate_meal_calories,
-    calculate_total_nutrition
+    evaluate_meal_nutrition,
+    get_meal_type_standard
 )
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     "get_weekly_statistics",
     "get_bmi_category",
     "calculate_meal_calories",
-    "calculate_total_nutrition"
+    "evaluate_meal_nutrition",
+    "get_meal_type_standard"
 ]

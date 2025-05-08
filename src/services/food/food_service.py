@@ -70,6 +70,7 @@ async def save_new_dish_to_db(
                 "carb": ing.get("carb", 0),
                 "fiber": ing.get("fiber", 0),
                 "calories": ing.get("calories", 0),
+                "did_you_know": ing.get("did_you_know", ""),
                 "created_at": now,
                 "updated_at": now
             }
@@ -82,7 +83,8 @@ async def save_new_dish_to_db(
                 "ingredient_id": str(ingredient_result.inserted_id),
                 "name": ing.get("name", "Unknown Ingredient"),
                 "quantity": ing.get("quantity", 0),
-                "unit": ing.get("unit", "g")
+                "unit": ing.get("unit", "g"),
+                "did_you_know": ing.get("did_you_know", "")
             })
         
         # Update food with ingredients
@@ -256,7 +258,7 @@ async def update_food(food_id: str, food_update: FoodUpdate) -> Dict[str, Any]:
     """
     try:
         # Convert model to dict and remove None values
-        update_data = {k: v for k, v in food_update.dict(exclude={"ingredients", "nutrition"}) if v is not None}
+        update_data = {k: v for k, v in food_update.dict(exclude={"ingredients", "nutrition"}).items() if v is not None}
         update_data["updated_at"] = datetime.utcnow()
         
         # Convert string ID to ObjectId
@@ -265,23 +267,24 @@ async def update_food(food_id: str, food_update: FoodUpdate) -> Dict[str, Any]:
         # Check if food exists
         existing_food = await foods_collection.find_one({"_id": object_id})
         if not existing_food:
-            # Handle nutrition information if provided
-            if food_update.nutrition:
-    # Convert nutrition model to dict
-                update_data["nutrition"] = food_update.nutrition.dict()
-    
-    # Update total nutrition values based on nutrition info
-                if hasattr(food_update.nutrition, "calories"):
-                    update_data["total_calories"] = food_update.nutrition.calories
-                if hasattr(food_update.nutrition, "protein"):
-                    update_data["total_protein"] = food_update.nutrition.protein
-                if hasattr(food_update.nutrition, "fat"):
-                    update_data["total_fat"] = food_update.nutrition.fat
-                if hasattr(food_update.nutrition, "carbs"):
-                    update_data["total_carb"] = food_update.nutrition.carbs
-                if hasattr(food_update.nutrition, "fiber"):
-                    update_data["total_fiber"] = food_update.nutrition.fiber
-                raise HTTPException(status_code=404, detail="Food not found for updating")
+            raise HTTPException(status_code=404, detail="Food not found for updating")
+        
+        # Handle nutrition information if provided
+        if food_update.nutrition:
+            # Convert nutrition model to dict
+            update_data["nutrition"] = food_update.nutrition.dict()
+            
+            # Update total nutrition values based on nutrition info
+            if hasattr(food_update.nutrition, "calories"):
+                update_data["total_calories"] = food_update.nutrition.calories
+            if hasattr(food_update.nutrition, "protein"):
+                update_data["total_protein"] = food_update.nutrition.protein
+            if hasattr(food_update.nutrition, "fat"):
+                update_data["total_fat"] = food_update.nutrition.fat
+            if hasattr(food_update.nutrition, "carb"):  # Đã sửa từ carbs sang carb để khớp với model đã cập nhật
+                update_data["total_carb"] = food_update.nutrition.carb
+            if hasattr(food_update.nutrition, "fiber"):
+                update_data["total_fiber"] = food_update.nutrition.fiber
         
         # Update the food document
         await foods_collection.update_one(
@@ -304,11 +307,12 @@ async def update_food(food_id: str, food_update: FoodUpdate) -> Dict[str, Any]:
                     "name": ing.name,
                     "quantity": ing.quantity,
                     "unit": ing.unit,
-                    "protein": ing.protein,
-                    "fat": ing.fat,
-                    "carb": ing.carb,
-                    "fiber": ing.fiber,
-                    "calories": ing.calories,
+                    "protein": getattr(ing, "protein", 0),
+                    "fat": getattr(ing, "fat", 0),
+                    "carb": getattr(ing, "carb", 0),
+                    "fiber": getattr(ing, "fiber", 0),
+                    "calories": getattr(ing, "calories", 0),
+                    "did_you_know": getattr(ing, "did_you_know", ""),
                     "created_at": now,
                     "updated_at": now
                 }
@@ -321,34 +325,36 @@ async def update_food(food_id: str, food_update: FoodUpdate) -> Dict[str, Any]:
                     "ingredient_id": str(ingredient_result.inserted_id),
                     "name": ing.name,
                     "quantity": ing.quantity,
-                    "unit": ing.unit
+                    "unit": ing.unit,
+                    "did_you_know": getattr(ing, "did_you_know", "")
                 })
             
             # Update food with ingredients
             await foods_collection.update_one(
                 {"_id": object_id},
                 {"$set": {"ingredients": ingredient_refs}}
-                # Recalculate total nutrition from ingredients if not provided directly
-                if not food_update.nutrition:
-                # Calculate totals from ingredients
-                    total_calories = sum(ing.calories for ing in food_update.ingredients)
-                    total_protein = sum(ing.protein for ing in food_update.ingredients)
-                    total_fat = sum(ing.fat for ing in food_update.ingredients)
-                    total_carb = sum(ing.carb for ing in food_update.ingredients)
-                    total_fiber = sum(ing.fiber for ing in food_update.ingredients)
-    
-                    # Update food with calculated totals
-                    await foods_collection.update_one(
-                        {"_id": object_id},
-                        {"$set": {
-                            "total_calories": total_calories,
-                            "total_protein": total_protein,
-                            "total_fat": total_fat,
-                            "total_carb": total_carb,
-                            "total_fiber": total_fiber
-                        }}
-                )
             )
+            
+            # Recalculate total nutrition from ingredients if not provided directly
+            if not food_update.nutrition:
+                # Calculate totals from ingredients
+                total_calories = sum(getattr(ing, "calories", 0) for ing in food_update.ingredients)
+                total_protein = sum(getattr(ing, "protein", 0) for ing in food_update.ingredients)
+                total_fat = sum(getattr(ing, "fat", 0) for ing in food_update.ingredients)
+                total_carb = sum(getattr(ing, "carb", 0) for ing in food_update.ingredients)
+                total_fiber = sum(getattr(ing, "fiber", 0) for ing in food_update.ingredients)
+                
+                # Update food with calculated totals
+                await foods_collection.update_one(
+                    {"_id": object_id},
+                    {"$set": {
+                        "total_calories": total_calories,
+                        "total_protein": total_protein,
+                        "total_fat": total_fat,
+                        "total_carb": total_carb,
+                        "total_fiber": total_fiber
+                    }}
+                )
         
         # Return updated food with ingredients
         updated_food = await foods_collection.find_one({"_id": object_id})
@@ -359,7 +365,6 @@ async def update_food(food_id: str, food_update: FoodUpdate) -> Dict[str, Any]:
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating food: {str(e)}")
-
 
 async def delete_food(food_id: str) -> bool:
     """

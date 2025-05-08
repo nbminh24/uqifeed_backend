@@ -50,37 +50,74 @@ async def detect_food_with_gemini(image_path: str) -> List[FoodItem]:
     
     # Prompt for food detection with detailed descriptions and nutrition estimation
     prompt = """
-    Analyze this food image and identify all food items visible. 
-    For each item provide:
-    1. Name of the food
+    Analyze this food image and identify the dish and its ingredients. 
+    
+    For the dish:
+    1. Name of the dish
     2. A detailed description (3-5 sentences) that includes:
-       - Information about ingredients
-       - Natural science aspects (nutritional benefits, origin)
+       - Cultural origin and significance
        - Flavor profile
-       - Cultural significance or traditional preparation methods
-    3. Estimated nutrition per 100g or standard serving:
-       - Calories
-       - Protein (g)
-       - Carbs (g)
-       - Fat (g)
+       - Traditional preparation methods
+    3. List of ingredients with detailed information for each, including:
+       - Name of the ingredient
+       - Estimated quantity and unit (g, ml, etc.)
+       - Nutritional value per quantity used:
+         * Protein (g)
+         * Fat (g)
+         * Carbs (g)
+         * Fiber (g)
+         * Calories
+       - "Did You Know" fact: Write exactly 3 sentences about the ingredient:
+         * First sentence: A scientific/botanical description
+         * Second sentence: Nutritional benefits or properties
+         * Third sentence: Cultural significance or culinary uses across different cuisines
+    4. Overall nutritional information of the dish:
+       - Total calories
+       - Total protein (g)
+       - Total fat (g)
+       - Total carbs (g)
+       - Total fiber (g)
     
-    Example description: "Sò (clams) have a sweet and rich flavor, found in coastal waters worldwide. They're an excellent source of protein, vitamin B12, and minerals like zinc and iron. Clams are commonly steamed, grilled, or used in soups. In Vietnamese cuisine, they're often enjoyed in hot pot dishes or stir-fried with tamarind sauce, representing the country's rich seafood tradition."
+    Example "Did You Know" fact format: 
+    "Clams are a nutritious and flavorful shellfish often featured in both everyday meals and traditional dishes around the world. Naturally rich in protein, iron, and vitamin B12, they are commonly steamed, grilled, stir-fried, or added to soups for their sweet, briny taste. From Asian-style lemongrass steamed clams to Western clam chowder, they showcase a delicious blend of nutrition and cultural variety."
     
-    Format your response as a JSON list of objects, each with 'name', 'description', and 'estimated_nutrition' fields.
+    Format your response as a JSON with 'food_name', 'description', 'ingredients' (array), 'total_calories', 'total_protein', 'total_fat', 'total_carb', and 'total_fiber' fields.
+    Each ingredient should have 'name', 'quantity', 'unit', 'protein', 'fat', 'carb', 'fiber', 'calories', and 'did_you_know' fields.
+    
     Example:
-    [
-      {
-        "name": "Apple",
-        "description": "Apples are crisp and sweet fruits with numerous health benefits. They contain dietary fiber, particularly pectin, which aids digestion and helps regulate blood sugar levels. The skin contains quercetin, a flavonoid with antioxidant properties. In many cultures, apples symbolize knowledge and are used in numerous desserts like pies and tarts.",
-        "estimated_nutrition": {
-          "calories": 52,
-          "protein": 0.3,
-          "carbs": 14,
-          "fat": 0.2
+    {
+      "food_name": "Vietnamese Pho",
+      "description": "Pho is a traditional Vietnamese soup consisting of broth, rice noodles, herbs, and meat. It's known for its complex flavor profile balancing sweet, salty, citrus, and heat. The dish originated in northern Vietnam and became popular worldwide for its aromatic broth that's simmered for hours with spices.",
+      "ingredients": [
+        {
+          "name": "Rice Noodles",
+          "quantity": 100,
+          "unit": "g",
+          "protein": 2,
+          "fat": 0.5,
+          "carb": 24,
+          "fiber": 0.9,
+          "calories": 109,
+          "did_you_know": "Rice noodles are made from rice flour and water, forming translucent, delicate strands with a tender texture when cooked. They are naturally gluten-free and low in fat, making them suitable for various dietary restrictions. From Vietnamese pho to Thai pad thai, rice noodles are a versatile staple in many Southeast Asian cuisines, adapting well to both stir-fries and soups."
+        },
+        {
+          "name": "Beef Broth",
+          "quantity": 350,
+          "unit": "ml",
+          "protein": 5.6,
+          "fat": 2.1,
+          "carb": 0.8,
+          "fiber": 0,
+          "calories": 44,
+          "did_you_know": "Beef broth is made by simmering beef bones, meat, and vegetables in water to extract flavors, nutrients, and gelatin. Rich in collagen, amino acids, and minerals like calcium and magnesium, it may support joint health and improve gut barrier function. From French onion soup to Vietnamese pho, beef broth forms the flavor foundation of countless traditional dishes across global cuisines."
         }
-      },
-      ...
-    ]
+      ],
+      "total_calories": 320,
+      "total_protein": 18,
+      "total_fat": 7.8,
+      "total_carb": 42,
+      "total_fiber": 2.1
+    }
     """
     
     try:
@@ -90,52 +127,76 @@ async def detect_food_with_gemini(image_path: str) -> List[FoodItem]:
         # Extract the text response
         text_response = response.text
         
-        # Process the response to extract food items
-        # (In production, you'd use proper JSON parsing with error handling)
-        # This is a simplified example
-        
+        # Process the response to extract food information
         import json
         import re
         
-        # Try to find JSON content in the response
-        json_match = re.search(r'\[\s*\{.*\}\s*\]', text_response, re.DOTALL)
+        # Try to find JSON content in the response (object format)
+        json_match = re.search(r'\{[\s\S]*\}', text_response, re.DOTALL)
         
         if json_match:
             json_str = json_match.group(0)
             try:
-                food_items_data = json.loads(json_str)
+                food_data = json.loads(json_str)
                 
-                # Convert to FoodItem objects
-                food_items = []
-                for item_data in food_items_data:
-                    try:
-                        # Create nutrition info
-                        nutrition_data = item_data.get("estimated_nutrition", {})
-                        
-                        food_item = FoodItem(
-                            name=item_data["name"],
-                            description=item_data.get("description", ""),
-                            confidence=0.8,  # Gemini doesn't provide confidence scores
-                            estimated_nutrition={
-                                "calories": nutrition_data.get("calories", 0),
-                                "protein": nutrition_data.get("protein", 0),
-                                "carbs": nutrition_data.get("carbs", 0),
-                                "fat": nutrition_data.get("fat", 0)
-                            }
-                        )
-                        food_items.append(food_item)
-                    except Exception as e:
-                        # Skip items with errors
-                        continue
+                # Prepare data according to FoodRecognitionResponse schema
+                food_recognition = {
+                    "food_name": food_data.get("food_name", "Unknown Food"),
+                    "meal_type": "lunch",  # Default value, can be overridden later
+                    "ingredients": [],
+                    "total_calories": food_data.get("total_calories", 0),
+                    "total_protein": food_data.get("total_protein", 0),
+                    "total_fat": food_data.get("total_fat", 0),
+                    "total_carb": food_data.get("total_carb", 0),
+                    "total_fiber": food_data.get("total_fiber", 0)
+                }
                 
-                return food_items
-            except json.JSONDecodeError:
-                # Fallback if JSON parsing fails
-                pass
+                # Process ingredients
+                for ing_data in food_data.get("ingredients", []):
+                    ingredient = {
+                        "name": ing_data.get("name", "Unknown"),
+                        "quantity": ing_data.get("quantity", 0),
+                        "unit": ing_data.get("unit", "g"),
+                        "protein": ing_data.get("protein", 0),
+                        "fat": ing_data.get("fat", 0),
+                        "carb": ing_data.get("carb", 0),
+                        "fiber": ing_data.get("fiber", 0),
+                        "calories": ing_data.get("calories", 0),
+                        "did_you_know": ing_data.get("did_you_know", "")
+                    }
+                    food_recognition["ingredients"].append(ingredient)
+                
+                return food_recognition
+                
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON response: {str(e)}")
+                print(f"Response text: {text_response}")
+                # Fall through to fallback method
         
-        # If JSON parsing fails, extract basic food names
+        # Fallback: If proper JSON parsing fails, return basic food item
         food_names = extract_food_names_from_text(text_response)
-        return [FoodItem(name=name) for name in food_names]
+        if food_names:
+            return {
+                "food_name": food_names[0],
+                "meal_type": "lunch",
+                "ingredients": [],
+                "total_calories": 0,
+                "total_protein": 0,
+                "total_fat": 0,
+                "total_carb": 0,
+                "total_fiber": 0
+            }
+        else:
+            return {
+                "food_name": "Unknown Food",
+                "meal_type": "lunch",
+                "ingredients": [],
+                "total_calories": 0,
+                "total_protein": 0,
+                "total_fat": 0,
+                "total_carb": 0,
+                "total_fiber": 0
+            }
         
     except Exception as e:
         # Log the error and return empty list

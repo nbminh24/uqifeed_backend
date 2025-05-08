@@ -138,7 +138,7 @@ async def calculate_macros(tdee: float, goal: str, diet_type: str, profile: Dict
     return {
         "calories": round(calorie_target),
         "protein": protein_g,
-        "carbs": carbs_g,
+        "carb": carbs_g,  # Đã sửa từ carbs sang carb để khớp với database
         "fat": fat_g,
         "fiber": fiber_g,
         "water": water_ml
@@ -173,7 +173,7 @@ async def create_or_update_nutrition_target(user_id: str) -> Dict[str, Any]:
         "tdee": tdee,
         "calories": macros["calories"],
         "protein": macros["protein"],
-        "carbs": macros["carbs"],
+        "carb": macros["carb"],
         "fat": macros["fat"],
         "fiber": macros["fiber"],
         "water": macros["water"],

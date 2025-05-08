@@ -42,7 +42,7 @@ class FoodCategory(str, Enum):
 class NutritionInfo(BaseModel):
     calories: float
     protein: float  # in grams
-    carbs: float  # in grams
+    carb: float  # in grams (đổi từ carbs sang carb để đồng nhất với database)
     fat: float  # in grams
     fiber: Optional[float] = None  # in grams
     sugar: Optional[float] = None  # in grams
