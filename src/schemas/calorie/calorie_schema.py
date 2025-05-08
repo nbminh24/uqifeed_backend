@@ -190,3 +190,25 @@ class AdviseResponse(AdviseBase, MongoBaseModel):
     """Schema for advise response"""
     food_id: str
     created_at: Optional[datetime] = None
+
+class MeasurementUnitBase(BaseModel):
+    """Schema for measurement units"""
+    name: str
+    category: str  # weight, volume, quantity, etc.
+    conversion_factor: float  # Factor to convert to base unit (e.g., grams)
+    base_unit: str  # Base unit (e.g., "g" for grams)
+
+class ChartTypeEnum(str, Enum):
+    """Enum for chart types in reports"""
+    CALORIES = "calories"
+    PROTEIN = "protein"
+    FAT = "fat"
+    CARB = "carb"
+    FIBER = "fiber"
+    INGREDIENTS = "ingredients"
+
+class WeeklyReportCommentBase(BaseModel):
+    """Base schema for weekly report comments"""
+    chart_type: ChartTypeEnum
+    comment: str
+    suggestions: str

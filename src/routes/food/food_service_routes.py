@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime
+from src.utils.error_handling import handle_api_error, NotFoundError, AuthorizationError
 
 from src.middleware import get_current_user
 from src.services.food import search_foods, get_food_with_ingredients, update_food, delete_food
@@ -30,45 +31,30 @@ async def list_foods(
     return await search_foods(name=name, category=category, user_id=current_user["id"], skip=skip, limit=limit)
 
 @router.get("/{food_id}", response_model=FoodResponse)
-async def get_food(
-    food_id: str,
-    current_user = Depends(get_current_user)
-):
-    """
-    Get a specific food by ID
-    
-    - **food_id**: ID of the food to retrieve
-    """
+@handle_api_error
+async def get_food(food_id: str, current_user = Depends(get_current_user)):
     food = await get_food_with_ingredients(food_id)
     if not food:
-        raise HTTPException(status_code=404, detail="Food not found")
+        raise NotFoundError("Food not found")
     return food
 
 @router.put("/{food_id}", response_model=FoodResponse)
-async def edit_food(
-    food_id: str,
-    food_update: FoodUpdate,
-    current_user = Depends(get_current_user)
-):
-    """
-    Update an existing food item
-    
-    - **food_id**: ID of the food to update
-    - **food_update**: Updated food data
-    """
+@handle_api_error
+async def edit_food(food_id: str, food_update: FoodUpdate, current_user = Depends(get_current_user)):
     # Check if food exists
     existing_food = await get_food_with_ingredients(food_id)
     if not existing_food:
-        raise HTTPException(status_code=404, detail="Food not found")
+        raise NotFoundError("Food not found")
     
     # Check if user is the creator or has admin privileges
     if existing_food.get("created_by") != current_user["id"] and current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized to update this food item")
+        raise AuthorizationError("Not authorized to update this food item")
     
     updated_food = await update_food(food_id, food_update)
     return updated_food
 
 @router.delete("/{food_id}", response_model=dict)
+@handle_api_error
 async def remove_food(
     food_id: str,
     current_user = Depends(get_current_user)
@@ -81,11 +67,11 @@ async def remove_food(
     # Check if food exists
     existing_food = await get_food_with_ingredients(food_id)
     if not existing_food:
-        raise HTTPException(status_code=404, detail="Food not found")
+        raise NotFoundError("Food not found")
     
     # Check if user is the creator or has admin privileges
     if existing_food.get("created_by") != current_user["id"] and current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized to delete this food item")
+        raise AuthorizationError("Not authorized to delete this food item")
     
     result = await delete_food(food_id)
     return {"message": "Food deleted successfully", "id": food_id}

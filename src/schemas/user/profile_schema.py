@@ -1,45 +1,43 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator, root_validator
 from typing import Optional, List
 from datetime import datetime, date
 from enum import Enum
 
 class Gender(str, Enum):
-    MALE = "MALE"
-    FEMALE = "FEMALE"
-    OTHER = "OTHER"
+    MALE = "male"
+    FEMALE = "female"
+    OTHER = "other"
 
 class ActivityLevel(str, Enum):
-    SEDENTARY = "SEDENTARY"
-    LIGHTLY_ACTIVE = "LIGHTLY_ACTIVE"
-    MODERATELY_ACTIVE = "MODERATELY_ACTIVE"
-    VERY_ACTIVE = "VERY_ACTIVE"
-    EXTRA_ACTIVE = "EXTRA_ACTIVE"
+    SEDENTARY = "sedentary"
+    LIGHTLY_ACTIVE = "lightly_active"
+    MODERATELY_ACTIVE = "moderately_active"
+    VERY_ACTIVE = "very_active"
+    EXTREMELY_ACTIVE = "extremely_active"
 
 class WeightGoal(str, Enum):
-    LOSE = "LOSE"
-    MAINTAIN = "MAINTAIN"
-    GAIN = "GAIN"
+    LOSE = "lose"
+    MAINTAIN = "maintain"
+    GAIN = "gain"
 
 class DietType(str, Enum):
-    STANDARD = "STANDARD"
-    HIGH_PROTEIN = "HIGH_PROTEIN"
-    KETO = "KETO"
-    LOW_FAT = "LOW_FAT"
-    VEGETARIAN = "VEGETARIAN"
-    VEGAN = "VEGAN"
-    MEDITERRANEAN = "MEDITERRANEAN"
+    BALANCED = "balanced"
+    VEGETARIAN = "vegetarian"
+    VEGAN = "vegan"
+    PALEO = "paleo"
+    KETO = "keto"
+    HIGH_PROTEIN = "high_protein"
+    LOW_CARB = "low_carb"
 
 class AdditionalGoal(str, Enum):
-    MUSCLE_GAIN = "MUSCLE_GAIN"
-    IMPROVED_FITNESS = "IMPROVED_FITNESS"
-    BETTER_SLEEP = "BETTER_SLEEP"
-    INCREASED_ENERGY = "INCREASED_ENERGY"
-    REDUCED_STRESS = "REDUCED_STRESS"
-    IMPROVED_DIGESTION = "IMPROVED_DIGESTION"
-    BALANCED_NUTRITION = "BALANCED_NUTRITION"
-    BETTER_HYDRATION = "BETTER_HYDRATION"
-    REDUCED_SUGAR = "REDUCED_SUGAR"
-    HEART_HEALTH = "HEART_HEALTH"
+    EAT_MORE_GREENS = "eat_more_greens"
+    DRINK_MORE_WATER = "drink_more_water"
+    INCREASE_FIBER = "increase_fiber"
+    EAT_LESS_SUGAR = "eat_less_sugar"
+    REDUCE_SALT = "reduce_salt"
+    EAT_MORE_PROTEIN = "eat_more_protein"
+    IMPROVE_EATING_HABITS = "improve_eating_habits"
+    EAT_FEWER_CARBS = "eat_fewer_carbs"
 
 class ProfileBase(BaseModel):
     """Base profile schema with common fields"""
@@ -56,6 +54,32 @@ class ProfileNutritionCreate(ProfileBase):
     desired_weight: Optional[float] = None
     goal_duration_weeks: Optional[int] = None
     additional_goals: Optional[List[AdditionalGoal]] = []
+
+    @validator('height')
+    def height_must_be_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Height must be positive')
+        return v
+
+    @validator('weight', 'desired_weight')
+    def weight_must_be_positive(cls, v):
+        if v and v <= 0:
+            raise ValueError('Weight must be positive')
+        return v
+
+    @root_validator
+    def check_desired_weight_required(cls, values):
+        goal = values.get('goal')
+        desired_weight = values.get('desired_weight')
+        duration = values.get('goal_duration_weeks')
+        
+        if goal in [WeightGoal.LOSE, WeightGoal.GAIN]:
+            if not desired_weight:
+                raise ValueError('Desired weight is required when goal is to lose or gain weight')
+            if not duration:
+                raise ValueError('Goal duration is required when goal is to lose or gain weight')
+        
+        return values
 
 class ProfileNutritionUpdate(BaseModel):
     """Schema for updating a profile - all fields optional"""
@@ -76,6 +100,7 @@ class ProfileNutritionResponse(BaseModel):
     user_id: str
     gender: Gender
     birthdate: date
+    age: Optional[int] = None  # Calculated field
     height: float
     weight: float
     desired_weight: Optional[float] = None
@@ -87,5 +112,23 @@ class ProfileNutritionResponse(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     
+    @validator('age', pre=True, always=True)
+    def calculate_age(cls, v, values):
+        if 'birthdate' in values:
+            today = datetime.now().date()
+            birthdate = values['birthdate']
+            age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+            return age
+        return v
+    
     class Config:
         orm_mode = True
+
+# Progress Projection Schema
+class ProgressProjection(BaseModel):
+    """Schema for weight progress projection"""
+    start_date: date
+    start_weight: float
+    projected_dates: List[date]
+    projected_weights: List[float]
+    weekly_change_rate: float

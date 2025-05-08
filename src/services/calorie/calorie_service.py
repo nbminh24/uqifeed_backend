@@ -2,6 +2,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime, date, timedelta
 from bson import ObjectId
 from fastapi import HTTPException
+from functools import lru_cache
 
 from src.config.database import (
     foods_collection, 
@@ -12,6 +13,15 @@ from src.config.database import (
     profiles_collection
 )
 from src.services.food.food_detector import detect_food_from_image
+from src.config.constants import (
+    CALORIE_DISTRIBUTION,
+    MAX_CALORIES,
+    MACRO_RATIOS,
+    CACHE_SIZE,
+    ERROR_MESSAGES
+)
+from src.utils.validation import validate_nutrition_values, validate_date_format
+from src.utils.db_utils import safe_db_operation
 
 async def calculate_dish_calories(food_id: str, user_id: str) -> Dict:
     """
@@ -661,7 +671,38 @@ async def get_bmi_category(bmi: float) -> str:
     else:
         return "Obesity"
 
-async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -> Dict:
+@lru_cache(maxsize=CACHE_SIZE)
+async def get_meal_type_standard(meal_type: str) -> Dict[str, Any]:
+    """
+    Get nutrition standard for a meal type
+    
+    Args:
+        meal_type: Type of meal (breakfast, lunch, dinner, snack, light_meal, drinks)
+        
+    Returns:
+        Nutrition standard for the meal type
+    """
+    if meal_type not in CALORIE_DISTRIBUTION:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid meal type: {meal_type}"
+        )
+    
+    standard = {
+        "meal_type": meal_type,
+        "calories_percentage": CALORIE_DISTRIBUTION.get(meal_type, 0) * 100 if CALORIE_DISTRIBUTION.get(meal_type) else None,
+        "macro_ratios": MACRO_RATIOS.get(meal_type, {"carbs": 0.4, "protein": 0.3, "fat": 0.3})
+    }
+    
+    # Add calorie limits for specific meal types
+    if meal_type in ["snack", "light_meal"]:
+        standard["max_calories"] = MAX_CALORIES[meal_type]
+    elif meal_type == "drinks":
+        standard["max_calories_per_100ml"] = MAX_CALORIES["drinks_per_100ml"]
+    
+    return standard
+
+async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -> Dict[str, Any]:
     """
     Calculate calories for a specific meal on a specific date
     
@@ -674,6 +715,11 @@ async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -
         Meal calorie information
     """
     try:
+        # Validate date format
+        is_valid, error_msg = validate_date_format(date_str)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
         # Parse date
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         
@@ -689,7 +735,9 @@ async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -
         }
         
         # Get meals
-        meals = await foods_collection.find(query).to_list(length=100)
+        meals = await safe_db_operation(
+            foods_collection.find(query).to_list(length=100)
+        )
         
         # Calculate totals
         total_calories = sum(meal.get("total_calories", 0) for meal in meals)
@@ -697,6 +745,13 @@ async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -
         total_fat = sum(meal.get("total_fat", 0) for meal in meals)
         total_carb = sum(meal.get("total_carb", 0) for meal in meals)
         total_fiber = sum(meal.get("total_fiber", 0) for meal in meals)
+        
+        # Validate totals
+        is_valid, error_msg = validate_nutrition_values(
+            total_calories, total_protein, total_fat, total_carb
+        )
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
         
         return {
             "date": date_str,
@@ -715,8 +770,13 @@ async def calculate_meal_calories(user_id: str, date_str: str, meal_type: str) -
                 for meal in meals
             ]
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error calculating meal calories: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=ERROR_MESSAGES["db_operation_failed"].format(error=str(e))
+        )
 
 async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Dict[str, Any]:
     """
@@ -1026,60 +1086,4 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi đánh giá dinh dưỡng bữa ăn: {str(e)}")
-
-async def get_meal_type_standard(meal_type: str) -> Dict:
-    """
-    Lấy tiêu chuẩn dinh dưỡng cho một loại bữa ăn
-    
-    Args:
-        meal_type: Loại bữa ăn (breakfast, lunch, dinner, snack, drinks, light_meal)
-        
-    Returns:
-        Tiêu chuẩn dinh dưỡng cho loại bữa ăn đó
-    """
-    # Phân bổ calo theo loại bữa ăn
-    calories_distribution = {
-        "breakfast": 0.25,  # 25% tổng calo ngày
-        "lunch": 0.40,      # 40% tổng calo ngày
-        "dinner": 0.35,     # 35% tổng calo ngày
-        "snack": None,      # Không dựa trên % tổng calo
-        "light_meal": None, # Không dựa trên % tổng calo
-        "drinks": None      # Không dựa trên % tổng calo
-    }
-    
-    # Tỷ lệ macro trong mỗi bữa ăn
-    macro_ratios = {
-        "breakfast": {"carbs": 0.35, "protein": 0.30, "fat": 0.35},
-        "lunch": {"carbs": 0.40, "protein": 0.30, "fat": 0.30},
-        "dinner": {"carbs": 0.25, "protein": 0.35, "fat": 0.40},
-        "snack": {"carbs": 0.45, "protein": 0.30, "fat": 0.25, "max_calories": 200},
-        "light_meal": {"carbs": 0.50, "protein": 0.40, "fat": 0.10, "max_calories": 250},
-        "drinks": {"max_calories_per_100ml": 20}
-    }
-    
-    standard = {
-        "meal_type": meal_type,
-        "calories_percentage": calories_distribution.get(meal_type, 0) * 100 if calories_distribution.get(meal_type) else None,
-        "macro_ratios": macro_ratios.get(meal_type, {"carbs": 0.4, "protein": 0.3, "fat": 0.3})
-    }
-    
-    # Thêm giới hạn calo cho bữa phụ
-    if meal_type in ["snack", "light_meal"]:
-        standard["max_calories"] = macro_ratios[meal_type]["max_calories"]
-    elif meal_type == "drinks":
-        standard["max_calories_per_100ml"] = macro_ratios[meal_type]["max_calories_per_100ml"]
-        
-    # Thêm mô tả
-    description_map = {
-        "breakfast": "Bữa sáng cần cung cấp năng lượng để khởi động ngày mới với carbs vừa phải và protein cao để giữ năng lượng lâu hơn.",
-        "lunch": "Bữa trưa cần cân bằng giữa carbs, protein và chất béo để duy trì năng lượng cho cả ngày.",
-        "dinner": "Bữa tối nên giảm carbs, tăng protein và chất béo để hỗ trợ phục hồi và duy trì cơ bắp trong khi ngủ.",
-        "snack": "Bữa ăn vặt nên nhỏ gọn, dưới 200 kcal với các loại thực phẩm giàu protein để duy trì cảm giác no lâu.",
-        "light_meal": "Ăn nhẹ dưới 250 kcal với nhiều carbs và protein, ít chất béo để tạo năng lượng nhanh.",
-        "drinks": "Đồ uống nên dưới 20 kcal/100ml để tránh nạp thừa calo từ đồ uống."
-    }
-    
-    standard["description"] = description_map.get(meal_type, "Không có mô tả cho loại bữa ăn này.")
-    
-    return standard
 
