@@ -77,46 +77,63 @@ async def detect_food_with_gemini(image_path: str) -> List[FoodItem]:
        - Total fat (g)
        - Total carbs (g)
        - Total fiber (g)
+    5. Health advice (write exactly 3 paragraphs):
+       - First paragraph: Detailed nutritional analysis including:
+         * Main nutrients provided
+         * Potential health concerns (e.g., high sodium, saturated fat)
+         * Impact on specific health conditions if any
+       - Second paragraph: Specific suggestions for making the dish healthier:
+         * Ingredient substitutions
+         * Cooking method modifications
+         * Portion control recommendations
+       - Third paragraph: Best practices for consumption:
+         * Ideal serving size
+         * Recommended frequency
+         * Complementary foods to balance nutrition
+         * Tips for digestion and nutrient absorption
     
-    Example "Did You Know" fact format: 
-    "Clams are a nutritious and flavorful shellfish often featured in both everyday meals and traditional dishes around the world. Naturally rich in protein, iron, and vitamin B12, they are commonly steamed, grilled, stir-fried, or added to soups for their sweet, briny taste. From Asian-style lemongrass steamed clams to Western clam chowder, they showcase a delicious blend of nutrition and cultural variety."
-    
-    Format your response as a JSON with 'food_name', 'description', 'ingredients' (array), 'total_calories', 'total_protein', 'total_fat', 'total_carb', and 'total_fiber' fields.
+    Format your response as a JSON with 'food_name', 'description', 'ingredients' (array), 'total_calories', 'total_protein', 'total_fat', 'total_carb', 'total_fiber', and 'health_advice' fields.
     Each ingredient should have 'name', 'quantity', 'unit', 'protein', 'fat', 'carb', 'fiber', 'calories', and 'did_you_know' fields.
+    The 'health_advice' field should be an object with 'benefits', 'improvements', and 'consumption' fields.
     
     Example:
     {
-      "food_name": "Vietnamese Pho",
-      "description": "Pho is a traditional Vietnamese soup consisting of broth, rice noodles, herbs, and meat. It's known for its complex flavor profile balancing sweet, salty, citrus, and heat. The dish originated in northern Vietnam and became popular worldwide for its aromatic broth that's simmered for hours with spices.",
+      "food_name": "Cheese Pizza",
+      "description": "A classic Italian dish featuring a thin crust topped with tomato sauce and melted cheese. The combination of crispy crust, tangy sauce, and gooey cheese creates a satisfying comfort food that has become popular worldwide.",
       "ingredients": [
         {
-          "name": "Rice Noodles",
-          "quantity": 100,
+          "name": "Pizza Dough",
+          "quantity": 150,
           "unit": "g",
-          "protein": 2,
-          "fat": 0.5,
-          "carb": 24,
-          "fiber": 0.9,
-          "calories": 109,
-          "did_you_know": "Rice noodles are made from rice flour and water, forming translucent, delicate strands with a tender texture when cooked. They are naturally gluten-free and low in fat, making them suitable for various dietary restrictions. From Vietnamese pho to Thai pad thai, rice noodles are a versatile staple in many Southeast Asian cuisines, adapting well to both stir-fries and soups."
+          "protein": 4.5,
+          "fat": 1.2,
+          "carb": 35,
+          "fiber": 2.1,
+          "calories": 170,
+          "did_you_know": "Pizza dough is made from wheat flour, water, yeast, and salt, creating a versatile base that can be thin and crispy or thick and chewy. The fermentation process breaks down complex carbohydrates, making them easier to digest. From Neapolitan to New York style, different regions have developed unique dough recipes and techniques."
         },
         {
-          "name": "Beef Broth",
-          "quantity": 350,
-          "unit": "ml",
-          "protein": 5.6,
-          "fat": 2.1,
-          "carb": 0.8,
+          "name": "Mozzarella Cheese",
+          "quantity": 100,
+          "unit": "g",
+          "protein": 22,
+          "fat": 22,
+          "carb": 2.2,
           "fiber": 0,
-          "calories": 44,
-          "did_you_know": "Beef broth is made by simmering beef bones, meat, and vegetables in water to extract flavors, nutrients, and gelatin. Rich in collagen, amino acids, and minerals like calcium and magnesium, it may support joint health and improve gut barrier function. From French onion soup to Vietnamese pho, beef broth forms the flavor foundation of countless traditional dishes across global cuisines."
+          "calories": 280,
+          "did_you_know": "Mozzarella is a semi-soft Italian cheese made from buffalo or cow's milk, known for its stretchy texture when melted. Rich in calcium and protein, it provides essential nutrients for bone health and muscle maintenance. Originally from southern Italy, mozzarella is now a key ingredient in many global cuisines, particularly in pizza and pasta dishes."
         }
       ],
-      "total_calories": 320,
-      "total_protein": 18,
-      "total_fat": 7.8,
-      "total_carb": 42,
-      "total_fiber": 2.1
+      "total_calories": 450,
+      "total_protein": 26.5,
+      "total_fat": 23.2,
+      "total_carb": 37.2,
+      "total_fiber": 2.1,
+      "health_advice": {
+        "benefits": "Pizza provides a good balance of carbohydrates, protein, and fat, making it a satisfying meal. The tomato sauce contributes antioxidants like lycopene, while the cheese offers calcium and protein. However, the combination of refined flour, cheese, and processed meats can be high in sodium, saturated fat, and calories, which may impact heart health and weight management if consumed frequently.",
+        "improvements": "To make pizza healthier, opt for a thin whole-grain crust to increase fiber content. Use part-skim mozzarella or a blend of reduced-fat cheeses to lower saturated fat. Add plenty of vegetables like bell peppers, mushrooms, and spinach for added nutrients and fiber. Consider using lean protein sources like grilled chicken instead of processed meats, and go easy on the cheese to reduce calorie and fat content.",
+        "consumption": "A standard serving of pizza is typically 1-2 slices (about 1/6 of a medium pizza). For optimal health, enjoy pizza as an occasional treat rather than a regular meal. Pair it with a side salad to increase vegetable intake and fiber content. To aid digestion, consider having a small portion of fresh fruit after the meal to help balance the meal's acidity and provide additional nutrients."
+      }
     }
     """
     
@@ -148,7 +165,12 @@ async def detect_food_with_gemini(image_path: str) -> List[FoodItem]:
                     "total_protein": food_data.get("total_protein", 0),
                     "total_fat": food_data.get("total_fat", 0),
                     "total_carb": food_data.get("total_carb", 0),
-                    "total_fiber": food_data.get("total_fiber", 0)
+                    "total_fiber": food_data.get("total_fiber", 0),
+                    "health_advice": food_data.get("health_advice", {
+                        "benefits": "No health advice available.",
+                        "improvements": "No improvement suggestions available.",
+                        "consumption": "No consumption advice available."
+                    })
                 }
                 
                 # Process ingredients
@@ -184,7 +206,12 @@ async def detect_food_with_gemini(image_path: str) -> List[FoodItem]:
                 "total_protein": 0,
                 "total_fat": 0,
                 "total_carb": 0,
-                "total_fiber": 0
+                "total_fiber": 0,
+                "health_advice": {
+                    "benefits": "No health advice available.",
+                    "improvements": "No improvement suggestions available.",
+                    "consumption": "No consumption advice available."
+                }
             }
         else:
             return {
@@ -195,7 +222,12 @@ async def detect_food_with_gemini(image_path: str) -> List[FoodItem]:
                 "total_protein": 0,
                 "total_fat": 0,
                 "total_carb": 0,
-                "total_fiber": 0
+                "total_fiber": 0,
+                "health_advice": {
+                    "benefits": "No health advice available.",
+                    "improvements": "No improvement suggestions available.",
+                    "consumption": "No consumption advice available."
+                }
             }
         
     except Exception as e:

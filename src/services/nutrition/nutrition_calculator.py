@@ -144,6 +144,61 @@ async def calculate_macros(tdee: float, goal: str, diet_type: str, profile: Dict
         "water": water_ml
     }
 
+async def calculate_meal_distribution(daily_calories: float) -> Dict[str, Dict[str, float]]:
+    """
+    Calculate nutrition distribution for each meal type
+    
+    Args:
+        daily_calories: Total daily calorie target
+    
+    Returns:
+        Dict containing nutrition targets for each meal type
+    """
+    # Standard meal distribution percentages
+    meal_distribution = {
+        "breakfast": {
+            "calories_percentage": 25,  # 25% of daily calories
+            "protein_percentage": 25,
+            "carb_percentage": 30,
+            "fat_percentage": 25,
+            "fiber_percentage": 25
+        },
+        "lunch": {
+            "calories_percentage": 35,  # 35% of daily calories
+            "protein_percentage": 35,
+            "carb_percentage": 35,
+            "fat_percentage": 35,
+            "fiber_percentage": 35
+        },
+        "dinner": {
+            "calories_percentage": 30,  # 30% of daily calories
+            "protein_percentage": 30,
+            "carb_percentage": 25,
+            "fat_percentage": 30,
+            "fiber_percentage": 30
+        },
+        "snack": {
+            "calories_percentage": 10,  # 10% of daily calories
+            "protein_percentage": 10,
+            "carb_percentage": 10,
+            "fat_percentage": 10,
+            "fiber_percentage": 10
+        }
+    }
+    
+    # Calculate actual values for each meal type
+    meal_targets = {}
+    for meal_type, percentages in meal_distribution.items():
+        meal_targets[meal_type] = {
+            "calories": round(daily_calories * (percentages["calories_percentage"] / 100)),
+            "protein_percentage": percentages["protein_percentage"],
+            "carb_percentage": percentages["carb_percentage"],
+            "fat_percentage": percentages["fat_percentage"],
+            "fiber_percentage": percentages["fiber_percentage"]
+        }
+    
+    return meal_targets
+
 async def create_or_update_nutrition_target(user_id: str) -> Dict[str, Any]:
     """
     Create or update a user's nutrition targets
@@ -166,6 +221,9 @@ async def create_or_update_nutrition_target(user_id: str) -> Dict[str, Any]:
     # Calculate macros
     macros = await calculate_macros(tdee, profile["goal"], profile["diet_type"], profile)
     
+    # Calculate meal distribution
+    meal_distribution = await calculate_meal_distribution(macros["calories"])
+    
     # Prepare nutrition target data
     target_data = {
         "user_id": user_id,
@@ -177,6 +235,7 @@ async def create_or_update_nutrition_target(user_id: str) -> Dict[str, Any]:
         "fat": macros["fat"],
         "fiber": macros["fiber"],
         "water": macros["water"],
+        "meal_distribution": meal_distribution,
         "updated_at": datetime.utcnow()
     }
     
@@ -239,4 +298,38 @@ async def calculate_progress_projection(
         "goal_duration_weeks": goal_duration_weeks,
         "weekly_change": round(weekly_change, 2),
         "weekly_projections": weekly_projections
+    }
+
+async def evaluate_fiber_intake(fiber_intake: float, target_fiber: float) -> Dict[str, Any]:
+    """
+    Evaluate fiber intake against target and provide feedback
+    
+    Args:
+        fiber_intake: Actual fiber intake in grams
+        target_fiber: Target fiber intake in grams
+    
+    Returns:
+        Dict: Evaluation results with feedback
+    """
+    percentage = (fiber_intake / target_fiber) * 100 if target_fiber > 0 else 0
+    
+    if percentage >= 100:
+        status = "EXCELLENT"
+        feedback = "Great job! You're meeting or exceeding your fiber target. This helps maintain digestive health and can reduce the risk of chronic diseases."
+    elif percentage >= 80:
+        status = "GOOD"
+        feedback = "Good fiber intake. Consider adding a bit more fiber-rich foods to reach your target."
+    elif percentage >= 60:
+        status = "MODERATE"
+        feedback = "Moderate fiber intake. Try to include more fruits, vegetables, and whole grains in your diet."
+    else:
+        status = "LOW"
+        feedback = "Low fiber intake. Increase your consumption of fiber-rich foods like fruits, vegetables, legumes, and whole grains."
+    
+    return {
+        "status": status,
+        "percentage": round(percentage, 1),
+        "feedback": feedback,
+        "intake": round(fiber_intake, 1),
+        "target": round(target_fiber, 1)
     }

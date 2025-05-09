@@ -1,183 +1,111 @@
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.openapi.utils import get_openapi
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-import os
-import sys
-import time
+from prometheus_client import make_asgi_app
 import logging
 from datetime import datetime
-from dotenv import load_dotenv
 
-# Add parent directory to path to allow importing config
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
-
-# Import using new structure
-from src.routes.user import user_router
-from src.routes.user.social_auth_routes import social_auth_routes
-from src.routes.food import food_router
-from src.routes.calorie.calorie_routes import router as calorie_router
-from src.routes.notification import router as notification_router
-from src.routes.dish import router as dish_router
-from src.utils.error_handling import error_handling_middleware, SecureHeadersMiddleware, APIMetricsMiddleware
-from src.config.database import initialize_database, initialize_meal_type_standards, client
-
-# Load environment variables
-load_dotenv()
+from src.routes import (
+    auth_router,
+    food_router,
+    dish_router,
+    calorie_router,
+    nutrition_router,
+    profile_router,
+    notification_router,
+    settings_router,
+    meal_plan_router,
+    social_router,
+    progress_router,
+    achievement_router
+)
+from src.middleware.rate_limit import RateLimitMiddleware
+from src.middleware.validation import RequestValidationMiddleware, QueryParamValidationMiddleware
+from src.middleware.monitoring import MetricsMiddleware
+from src.utils.error_handling import BaseAPIError, error_handler
+from src.utils.monitoring import ResourceMetricsCollector
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='app_errors.log'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger(__name__)
-
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address)
+logger = logging.getLogger("uqifeed")
 
 # Initialize FastAPI app
 app = FastAPI(
-    title=config.API_TITLE,
-    description=config.API_DESCRIPTION,
-    version=config.API_VERSION
+    title="Uqifeed API",
+    description="Backend API for Uqifeed nutrition tracking application",
+    version="1.0.0"
 )
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Add GZip compression
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-# Add security and performance middlewares
-app.add_middleware(SecureHeadersMiddleware)
-app.add_middleware(APIMetricsMiddleware)
-
-# Add custom error handling middleware
-app.middleware("http")(error_handling_middleware)
-
-# Configure CORS
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.CORS_ORIGINS,
+    allow_origins=["*"],  # In production, replace with specific origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Request timing middleware
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    start_time = time.time()
-    try:
-        response = await call_next(request)
-        process_time = time.time() - start_time
-        response.headers["X-Process-Time"] = str(process_time)
-        return response
-    except Exception as e:
-        # Log errors
-        logger.error(f"Error processing request: {str(e)}")
-        process_time = time.time() - start_time
-        error_response = JSONResponse(
-            status_code=500,
-            content={"detail": "Internal server error"}
-        )
-        error_response.headers["X-Process-Time"] = str(process_time)
-        return error_response
+# Add rate limiting middleware
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute=60,
+    burst_limit=10
+)
+
+# Add request validation middleware
+app.add_middleware(RequestValidationMiddleware)
+app.add_middleware(QueryParamValidationMiddleware)
+
+# Add metrics middleware
+app.add_middleware(MetricsMiddleware)
+
+# Add Prometheus metrics endpoint
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 
 # Include routers
-app.include_router(user_router)
-app.include_router(food_router)
-app.include_router(calorie_router)
-app.include_router(social_auth_routes)
-app.include_router(notification_router)
-app.include_router(dish_router)
+app.include_router(auth_router, prefix="/auth", tags=["authentication"])
+app.include_router(food_router, prefix="/foods", tags=["foods"])
+app.include_router(dish_router, prefix="/dishes", tags=["dishes"])
+app.include_router(calorie_router, prefix="/calories", tags=["calories"])
+app.include_router(nutrition_router, prefix="/nutrition", tags=["nutrition"])
+app.include_router(profile_router, prefix="/profile", tags=["profile"])
+app.include_router(notification_router, prefix="/notifications", tags=["notifications"])
+app.include_router(settings_router, prefix="/settings", tags=["settings"])
+app.include_router(meal_plan_router, prefix="/meal-plans", tags=["meal-plans"])
+app.include_router(social_router, prefix="/social", tags=["social"])
+app.include_router(progress_router, prefix="/progress", tags=["progress"])
+app.include_router(achievement_router, prefix="/achievements", tags=["achievements"])
 
-@app.on_event("startup")
-async def startup_db_client():
-    """Initialize database connection and setup on application startup"""
-    try:
-        # Initialize database connection and indexes
-        db_initialized = await initialize_database()
-        if db_initialized:
-            # Only initialize meal type standards if database connection is successful
-            await initialize_meal_type_standards()
-            logger.info("Application startup completed successfully")
-        else:
-            logger.critical("Database initialization failed")
-    except Exception as e:
-        logger.critical(f"Error during application startup: {str(e)}")
-        # In production, we might want to exit the application here if database connection fails
-        # But for development, we'll just log the error and continue
-        if not config.DEBUG:
-            logger.critical("Database connection critical error in production mode, exiting application")
-            import sys
-            sys.exit(1)
+# Add error handler
+app.add_exception_handler(BaseAPIError, error_handler)
 
-# Root endpoint
-@app.get("/", tags=["Root"])
-@limiter.limit("10/minute")
-async def root(request: Request):
-    """Root endpoint"""
+@app.get("/")
+async def root():
+    """Root endpoint - API health check"""
     return {
-        "message": "Welcome to UqiFeed API",
-        "version": config.API_VERSION,
-        "status": "online",
-        "documentation": "/docs",
-        "server_time": datetime.now().isoformat()
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "1.0.0"
     }
 
-# Health check endpoint
-@app.get("/health", tags=["Health"])
-async def health():
-    """Health check endpoint"""
-    try:
-        # Check database connection
-        await client.server_info()
-        db_status = "connected"
-    except Exception as e:
-        db_status = f"error: {str(e)}"
+@app.get("/health")
+async def health_check():
+    """Detailed health check endpoint"""
+    # Collect resource metrics
+    ResourceMetricsCollector.collect_metrics()
+    metrics = ResourceMetricsCollector.get_metrics()
     
     return {
         "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "database": db_status
+        "timestamp": datetime.utcnow().isoformat(),
+        "metrics": metrics
     }
 
-# Custom OpenAPI schema for better documentation
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    
-    openapi_schema = get_openapi(
-        title=config.API_TITLE,
-        version=config.API_VERSION,
-        description=config.API_DESCRIPTION,
-        routes=app.routes,
-    )
-    
-    # Add security schemes (for JWT authentication)
-    openapi_schema["components"]["securitySchemes"] = {
-        "Bearer": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-            "description": "Enter JWT token"
-        }
-    }
-    
-    # Add global security requirement (most endpoints require authentication)
-    openapi_schema["security"] = [{"Bearer": []}]
-    
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("src.main:app", host=config.HOST, port=config.PORT, reload=config.DEBUG)
+# Start resource metrics collection
+@app.on_event("startup")
+async def startup_event():
+    """Start resource metrics collection on startup"""
+    ResourceMetricsCollector.collect_metrics()

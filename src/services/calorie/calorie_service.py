@@ -10,7 +10,8 @@ from src.config.database import (
     nutrition_reviews_collection,
     advises_collection,
     nutrition_targets_collection,
-    profiles_collection
+    profiles_collection,
+    progress_metrics_collection
 )
 from src.services.food.food_detector import detect_food_from_image
 from src.config.constants import (
@@ -22,6 +23,7 @@ from src.config.constants import (
 )
 from src.utils.validation import validate_nutrition_values, validate_date_format
 from src.utils.db_utils import safe_db_operation
+from src.utils.websocket import websocket_manager
 
 async def calculate_dish_calories(food_id: str, user_id: str) -> Dict:
     """
@@ -1086,4 +1088,196 @@ async def evaluate_meal_nutrition(meal_data: Dict[str, Any], user_id: str) -> Di
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi đánh giá dinh dưỡng bữa ăn: {str(e)}")
+
+async def calculate_progress_metrics(user_id: str, current_date: date) -> Dict[str, Any]:
+    """
+    Calculate real-time progress metrics for the user
+    
+    Args:
+        user_id: User ID
+        current_date: Current date to calculate metrics for
+        
+    Returns:
+        Dict containing progress metrics
+    """
+    try:
+        # Get user profile and targets
+        profile = await get_user_profile(user_id)
+        targets = await get_nutrition_targets(user_id)
+        
+        if not profile or not targets:
+            return None
+            
+        # Get daily nutrition data
+        daily_data = await get_daily_nutrition(user_id, current_date)
+        
+        # Calculate progress metrics
+        metrics = {
+            "calories": {
+                "current": daily_data.get("total_calories", 0),
+                "target": targets.get("calories", 0),
+                "percentage": min(100, (daily_data.get("total_calories", 0) / targets.get("calories", 1)) * 100)
+            },
+            "protein": {
+                "current": daily_data.get("total_protein", 0),
+                "target": targets.get("protein", 0),
+                "percentage": min(100, (daily_data.get("total_protein", 0) / targets.get("protein", 1)) * 100)
+            },
+            "carbs": {
+                "current": daily_data.get("total_carbs", 0),
+                "target": targets.get("carbs", 0),
+                "percentage": min(100, (daily_data.get("total_carbs", 0) / targets.get("carbs", 1)) * 100)
+            },
+            "fat": {
+                "current": daily_data.get("total_fat", 0),
+                "target": targets.get("fat", 0),
+                "percentage": min(100, (daily_data.get("total_fat", 0) / targets.get("fat", 1)) * 100)
+            },
+            "fiber": {
+                "current": daily_data.get("total_fiber", 0),
+                "target": targets.get("fiber", 0),
+                "percentage": min(100, (daily_data.get("total_fiber", 0) / targets.get("fiber", 1)) * 100)
+            }
+        }
+        
+        # Calculate overall progress
+        overall_progress = sum(metric["percentage"] for metric in metrics.values()) / len(metrics)
+        metrics["overall"] = {
+            "percentage": overall_progress,
+            "status": "on_track" if 90 <= overall_progress <= 110 else "needs_attention"
+        }
+        
+        return metrics
+        
+    except Exception as e:
+        logger.error(f"Error calculating progress metrics: {str(e)}")
+        return None
+
+async def update_progress_metrics(user_id: str, current_date: date) -> None:
+    """
+    Update progress metrics in real-time when nutrition data changes
+    
+    Args:
+        user_id: User ID
+        current_date: Current date to update metrics for
+    """
+    try:
+        metrics = await calculate_progress_metrics(user_id, current_date)
+        if metrics:
+            # Update metrics in database
+            await progress_metrics_collection.update_one(
+                {
+                    "user_id": user_id,
+                    "date": current_date
+                },
+                {
+                    "$set": {
+                        "metrics": metrics,
+                        "updated_at": datetime.utcnow()
+                    }
+                },
+                upsert=True
+            )
+            
+            # Emit real-time update event
+            await emit_progress_update(user_id, metrics)
+            
+    except Exception as e:
+        logger.error(f"Error updating progress metrics: {str(e)}")
+
+async def emit_progress_update(user_id: str, metrics: Dict[str, Any]) -> None:
+    """
+    Emit real-time progress update event
+    
+    Args:
+        user_id: User ID
+        metrics: Progress metrics to emit
+    """
+    try:
+        # Emit WebSocket event for real-time updates
+        await websocket_manager.broadcast_to_user(
+            user_id,
+            {
+                "type": "progress_update",
+                "data": metrics
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error emitting progress update: {str(e)}")
+
+async def calculate_nutrient_scores(food_data: Dict[str, Any], user_id: str) -> Dict[str, Any]:
+    """
+    Calculate scores for each nutrient (protein, fiber, carbs, fat)
+    
+    Args:
+        food_data: Food data containing nutrient values
+        user_id: User ID for getting nutrition targets
+        
+    Returns:
+        Dict containing scores for each nutrient
+    """
+    try:
+        # Get user's nutrition targets
+        target = await nutrition_targets_collection.find_one({"user_id": user_id})
+        if not target:
+            raise HTTPException(status_code=404, detail="Nutrition targets not found")
+            
+        # Calculate scores for each nutrient
+        scores = {}
+        for nutrient, target_key in [
+            ("protein", "protein"),
+            ("fiber", "fiber"),
+            ("carb", "carb"),
+            ("fat", "fat")
+        ]:
+            actual = food_data.get(f"total_{nutrient}", 0)
+            target_value = target.get(target_key, 0)
+            
+            if target_value > 0:
+                percentage = (actual / target_value) * 100
+                # Score based on how close to target (100% is perfect)
+                score = max(0, min(100, 100 - abs(percentage - 100)))
+            else:
+                score = 0
+                
+            scores[nutrient] = round(score)
+            
+        return scores
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating nutrient scores: {str(e)}")
+
+async def generate_nutrition_badge(food_data: Dict[str, Any], user_id: str) -> str:
+    """
+    Generate a nutrition badge based on overall meal quality
+    
+    Args:
+        food_data: Food data containing nutrient values
+        user_id: User ID for getting nutrition targets
+        
+    Returns:
+        String containing nutrition badge
+    """
+    try:
+        # Get user's nutrition targets
+        target = await nutrition_targets_collection.find_one({"user_id": user_id})
+        if not target:
+            raise HTTPException(status_code=404, detail="Nutrition targets not found")
+            
+        # Calculate overall score
+        scores = await calculate_nutrient_scores(food_data, user_id)
+        overall_score = sum(scores.values()) / len(scores)
+        
+        # Generate badge based on score
+        if overall_score >= 90:
+            return "Excellent Choice"
+        elif overall_score >= 75:
+            return "Great Balance"
+        elif overall_score >= 60:
+            return "Good Meal"
+        else:
+            return "Needs Improvement"
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating nutrition badge: {str(e)}")
 

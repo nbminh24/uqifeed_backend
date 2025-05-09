@@ -29,102 +29,48 @@ logging.basicConfig(
 
 logger = logging.getLogger("uqifeed")
 
-# Custom exception classes
-class APIError(Exception):
-    """Base exception for API errors"""
+class BaseAPIError(Exception):
+    """Base class for API errors"""
     def __init__(
         self,
-        status_code: int,
-        detail: str,
-        error_code: str = None,
-        data: Dict[str, Any] = None
+        message: str,
+        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+        details: Optional[Dict[str, Any]] = None
     ):
+        self.message = message
         self.status_code = status_code
-        self.detail = detail
-        self.error_code = error_code
-        self.data = data or {}
+        self.details = details or {}
+        super().__init__(self.message)
 
+class NotFoundError(BaseAPIError):
+    """Error for when a resource is not found"""
+    def __init__(self, message: str = "Resource not found", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, status.HTTP_404_NOT_FOUND, details)
 
-class ValidationError(APIError):
-    """Exception for data validation errors"""
-    def __init__(self, detail: str, data: Dict[str, Any] = None):
-        super().__init__(
-            status_code=400,
-            detail=detail,
-            error_code="VALIDATION_ERROR",
-            data=data
-        )
+class ValidationError(BaseAPIError):
+    """Error for validation failures"""
+    def __init__(self, message: str = "Validation error", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, status.HTTP_400_BAD_REQUEST, details)
 
+class AuthorizationError(BaseAPIError):
+    """Error for authorization failures"""
+    def __init__(self, message: str = "Not authorized", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, status.HTTP_403_FORBIDDEN, details)
 
-class NotFoundError(APIError):
-    """Exception for resource not found errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=404,
-            detail=detail,
-            error_code="NOT_FOUND"
-        )
+class AuthenticationError(BaseAPIError):
+    """Error for authentication failures"""
+    def __init__(self, message: str = "Authentication failed", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, status.HTTP_401_UNAUTHORIZED, details)
 
+class RateLimitError(BaseAPIError):
+    """Error for rate limiting"""
+    def __init__(self, message: str = "Rate limit exceeded", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, status.HTTP_429_TOO_MANY_REQUESTS, details)
 
-class AuthenticationError(APIError):
-    """Exception for authentication errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=401,
-            detail=detail,
-            error_code="AUTHENTICATION_ERROR"
-        )
-
-
-class AuthorizationError(APIError):
-    """Exception for authorization errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=403,
-            detail=detail,
-            error_code="AUTHORIZATION_ERROR"
-        )
-
-
-class ConflictError(APIError):
-    """Exception for conflict errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=409,
-            detail=detail,
-            error_code="CONFLICT"
-        )
-
-
-class RateLimitError(APIError):
-    """Exception for rate limit errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=429,
-            detail=detail,
-            error_code="RATE_LIMIT_EXCEEDED"
-        )
-
-
-class DatabaseError(APIError):
-    """Exception for database errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=500,
-            detail=detail,
-            error_code="DATABASE_ERROR"
-        )
-
-
-class ExternalServiceError(APIError):
-    """Exception for external service errors"""
-    def __init__(self, detail: str):
-        super().__init__(
-            status_code=502,
-            detail=detail,
-            error_code="EXTERNAL_SERVICE_ERROR"
-        )
-
+class FileUploadError(BaseAPIError):
+    """Error for file upload issues"""
+    def __init__(self, message: str = "File upload failed", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, status.HTTP_400_BAD_REQUEST, details)
 
 # Error handling middleware
 async def error_handling_middleware(request: Request, call_next: Callable):
@@ -161,13 +107,12 @@ async def error_handling_middleware(request: Request, call_next: Callable):
             }
         )
     
-    except APIError as exc:
+    except BaseAPIError as exc:
         # Handle our custom API errors
         logger.error(
-            f"API Error: {exc.status_code} - {exc.detail}",
+            f"API Error: {exc.status_code} - {exc.message}",
             extra={
-                "error_code": exc.error_code,
-                "data": exc.data,
+                "details": exc.details,
                 "path": request.url.path,
                 "method": request.method,
                 "client_host": request.client.host if request.client else None,
@@ -178,9 +123,9 @@ async def error_handling_middleware(request: Request, call_next: Callable):
             status_code=exc.status_code,
             content={
                 "error": {
-                    "code": exc.error_code,
-                    "message": exc.detail,
-                    "data": exc.data,
+                    "code": exc.status_code,
+                    "message": exc.message,
+                    "details": exc.details,
                     "timestamp": datetime.utcnow().isoformat(),
                     "path": request.url.path
                 }
@@ -258,56 +203,43 @@ class APIMetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# Helper functions for exception handling
 def handle_api_error(func):
-    """
-    Decorator for API route handlers to handle exceptions consistently
-    Works with both async and sync functions
-    """
-    import inspect
-    
-    if inspect.iscoroutinefunction(func):
-        # For async functions
-        async def async_wrapper(*args, **kwargs):
-            try:
-                return await func(*args, **kwargs)
-            except APIError:
-                # Re-raise our custom exceptions for the middleware to handle
-                raise
-            except Exception as e:
-                # Convert generic exceptions to APIError
-                logger.error(f"Error in {func.__name__}: {str(e)}", exc_info=True)
-                raise APIError(f"Error processing request: {str(e)}")
-        return async_wrapper
-    else:
-        # For sync functions
-        def sync_wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except APIError:
-                # Re-raise our custom exceptions for the middleware to handle
-                raise
-            except Exception as e:
-                # Convert generic exceptions to APIError
-                logger.error(f"Error in {func.__name__}: {str(e)}", exc_info=True)
-                raise APIError(f"Error processing request: {str(e)}")
-        return sync_wrapper
+    """Decorator to handle API errors"""
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except BaseAPIError as e:
+            raise HTTPException(
+                status_code=e.status_code,
+                detail={
+                    "message": e.message,
+                    "details": e.details
+                }
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "message": "Internal server error",
+                    "details": str(e)
+                }
+            )
+    return wrapper
 
 
 async def error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Global error handler for all exceptions"""
-    if isinstance(exc, APIError):
-        logger.error(f"API Error: {exc.detail}", extra={
-            "error_code": exc.error_code,
-            "data": exc.data
+    if isinstance(exc, BaseAPIError):
+        logger.error(f"API Error: {exc.message}", extra={
+            "details": exc.details
         })
         return JSONResponse(
             status_code=exc.status_code,
             content={
                 "error": {
-                    "code": exc.error_code,
-                    "message": exc.detail,
-                    "data": exc.data
+                    "code": exc.status_code,
+                    "message": exc.message,
+                    "details": exc.details
                 }
             }
         )
@@ -336,3 +268,23 @@ async def error_handler(request: Request, exc: Exception) -> JSONResponse:
             }
         }
     )
+
+# Error messages
+ERROR_MESSAGES = {
+    "not_found": "The requested resource was not found",
+    "validation_error": "Invalid input data",
+    "auth_error": "Authentication failed",
+    "auth_required": "Authentication required",
+    "forbidden": "Not authorized to perform this action",
+    "rate_limit": "Too many requests, please try again later",
+    "file_upload": {
+        "invalid_type": "Invalid file type",
+        "too_large": "File size exceeds limit",
+        "upload_failed": "File upload failed"
+    },
+    "db_operation_failed": "Database operation failed: {error}",
+    "invalid_date": "Invalid date format. Use YYYY-MM-DD",
+    "invalid_meal_type": "Invalid meal type",
+    "invalid_nutrition": "Invalid nutrition values",
+    "invalid_ingredient": "Invalid ingredient data"
+}
